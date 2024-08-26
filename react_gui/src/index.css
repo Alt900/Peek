@@ -1,0 +1,201 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: black;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.DashboardContainer{
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 80%;
+  height: 100%;
+  border: 5px ;
+  border-style: solid;
+  border-color: rgb(105, 0, 105);
+}
+
+.Dashboard_Shadow{
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 80.5%;
+  height: 80.5%;
+  box-shadow: 0px 0px 100px rgb(105, 0, 105);
+  background-color: transparent;
+}
+
+.Tleft_Shadow{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 19.5%;
+  height: 19.5%;
+  background-color: transparent;
+  box-shadow: 0px 0px 100px rgb(105, 0, 105);
+}
+
+.TabsContainer{
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 80%;
+  height: 18%;
+  border: 5px ;
+  border-style: solid;
+  border-color: rgb(105, 0, 105);
+  box-shadow: 0px 0px 100px rgb(105, 0, 105);
+}
+
+.Dashboard{
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 80%;
+  height: 82%;
+}
+
+.ML_Operations{
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 97%;
+  width: 40%;
+}
+
+.MLOpButtons{
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 10%;
+  width: 10%;
+  background-color: transparent;
+  color: gray;
+  border: 2px;
+  border-color: gray;
+  border-style: solid;
+}
+
+.LockCover{
+  position: absolute;
+  background-color: linear-gradient(rgba(119, 119, 119, 0.3), rgb(164, 164, 164, 0.3));
+  top: 0;
+  right: 0;
+  width: 45;
+  height: 80.5%;
+}
+
+.ML_Parameters{
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 40%;
+  width: 60%;
+}
+
+.Epochs_Label{
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: transparent;
+  width: 20%;
+  height: 10%;
+  color: gray;
+}
+
+.Epochs_TextArea{
+  position: absolute;
+  top: 15%;
+  left: 0;
+  background-color: transparent;
+  color: gray;
+  width: 5%;
+  height: 10%;
+}
+
+.ML_ParameterLabel{
+  position: absolute;
+  top: 0;
+  width: 20%;
+  height: 10%;
+  color: gray;
+  border: 2px;
+  border-color: gray;
+}
+
+.ML_TextAreas{
+  position: absolute;
+  top: 15%;
+  background-color: gray;
+  color: black;
+  width: 5%;
+  height: 10%;
+}
+
+
+.Tabs{
+  position: absolute;
+  bottom: 0;
+  width: 10%;
+  height: 30%;
+  border: 3px ;
+  border-style: solid;
+  border-color: blueviolet;
+  color: blueviolet;
+  background-color: black;
+}
+
+.ToolBarContainer{
+  position: absolute;
+  top: 19%;
+  left: -.3%;
+  width: 19.5%;
+  height: 80%;
+  border: 5px ;
+  border-style: solid;
+  border-color: rgb(105, 0, 105);
+  box-shadow: 0px 0px 100px rgb(105, 0, 105);
+}
+
+.QASM_editor{
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 30%;
+  height: 98%;
+  border: 3px ;
+  border-style: solid;
+  border-color: rgb(105, 0, 105);
+}
+
+.QASM{
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 80%;
+  border: 3px;
+  border-style: solid;
+  background-color: transparent;
+  color: gray;
+}
+
+.QASM_Title{
+  position: absolute;
+  top: 12%;
+  left: 0;
+  width: 40%;
+  height: 3%;
+  color: gray;
+  border: 3px;
+  border-style: solid;
+  border-color: gray;
+}
