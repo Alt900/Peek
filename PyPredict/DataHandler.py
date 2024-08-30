@@ -1,4 +1,4 @@
-from . import np, pd, args
+from . import np, pd, ctypes, args
 from . import torch
 import statsmodels
 from datetime import datetime as dt
@@ -13,7 +13,7 @@ def int_to_dt(dtcolumn):
         dt.fromtimestamp(x) for x in dtcolumn
     ]
 
-windowsize=args["ML"][0]["windowsize"]
+windowsize=args["Window_Size"]
 
 class LSTM_Prep():
     def __init__(self,
@@ -98,3 +98,38 @@ class Feature_Engineering():
     
     def difference(self):
         return self.time_series.diff().fillna(0)
+    
+#normalization is handled by C
+def Normalize(Method,Array=None,Matrix=None):
+    Lib = ctypes.CDLL('./Lib/Normalization.dll')
+    dispatcher = {
+        "Logarithmic_Normalization":Lib.Logarithmic_Normalization,
+        "Z_Score_Normalization":Lib.Z_Score_Normalization,
+        "Min_Max_Normalization":Lib.Min_Max_Normalization,
+        "Difference_Normalization": Lib.Difference_Normalization,
+    }
+    Function=dispatcher[Method]
+    if Array!=None and Matrix==None:
+        Lib.Array=CArray
+        Lib.size=len(Array)
+        CArray = Array.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_long)
+        )
+
+    if Matrix!=None and Array==None:
+        row_count=Matrix.shape[0]
+        size=Matrix.shape[1]
+        Lib.size=size
+        Lib.row_count=row_count
+        Lib.FlattenMatrix(
+            Matrix.ctypes.data_as(
+                ctypes.POINTER(
+                    ctypes.POINTER(ctypes.c_long)
+                )
+            )
+        )#automatically sets Array
+
+    Function()#void, sets array
+    return np.ndarray(
+        (Lib.size,),'f',Lib.Array,'C'
+    )

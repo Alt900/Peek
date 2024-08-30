@@ -1,89 +1,79 @@
-from flask import Flask
-from flask_cors import CORS
-from PyPredict import API_Interface
-from PyPredict.API_Interface import data
-from PyPredict import Graphics
 
 import os
 import json
-import ctypes
+from flask import Flask,request
+from flask_cors import CORS
+import PyPredict
+from PyPredict import API_Interface
+from PyPredict import DataHandler
+from PyPredict import ML
 
-yeah=ctypes.CDLL(os.getcwd()+"\\CPy\\Statistics.dll")
-
-def DoINeedAHand(column,totalsize):
-    if totalsize >= 10000:
-        SetGlobals = yeah.SetGlobals
-        SetGlobals.restype=ctypes.c_void_p
-        SetGlobals.argtypes=[ctypes.Array,ctypes.c_int]
-        Clist=(ctypes.c_float*totalsize)(*column)
-        SetGlobals(Clist,totalsize)
-
-        STD = yeah.Median
-        STD.restype=ctypes.c_float
-        STD.argtypes=[]
-
-        return STD()
-    else:
-        return "nah"
-
-def Generate_Graph_Src():
-    json_formatted = {"Graphs": []}
-    for x in os.listdir(app_dir+"\\react_gui\\public\\Assets\\Graphs"):
-        if x.endswith(".png"):
-            json_formatted["Graphs"].append({
-                "src":f"/Assets/Graphs/{x}",
-                "alt":x
-            })
-    json_formatted = json.dumps(json_formatted, indent=4)
-    with open(f"{app_dir}\\react_gui\\src\\Graph_Src.json","w",encoding='utf-8') as F:
-        F.write(json_formatted)
-
-    return json_formatted
-
-app = Flask(__name__)
 app_dir = os.getcwd()
+app=Flask(__name__)
 CORS(app)
 
-@app.route("/Test_C_Code")
-def Test_C_Code():
-    column = data["NVDA"]["open"].values
-    size=len(column)
-    return {
-        "payload": DoINeedAHand(list(column),size),
-        "error": None
+@app.route("/SetDownloadArgs",methods=['GET'])
+def SetDownloadArgs():
+    PyPredict.args["Alpaca_key"]=request.args.get("Alpaca_key",type=str)
+    PyPredict.args["Alpaca_Secret"]=request.args.get("Alpaca_secret",type=str)
+    PyPredict.args["Tickers"]=request.args.getlist("Tickers")[0]
+    PyPredict.args["from"]=request.args.getlist("from")[0]
+    PyPredict.args["to"]=request.args.getlist("to")[0]
+    return{
+        "payload": "All download parameters are set",
+        "error":None
     }
 
-@app.route("/Get_Graphs")
-def Get_Graphs():
-    return {
-        "payload" : Generate_Graph_Src(),
-        "error" : None
-    }
-
-@app.route("/Generate_New_Graphs")
-def Generate_New_Graphs():
-    Graphics.graph_df(data)
-    Generate_Graph_Src()
-    return {
-        "payload" : "done",
-        "error" : None
-    }
-
-@app.route("/Download_New_Tickers")
-def Download_New_Tickers():
+@app.route("/DownloadData",methods=['GET'])
+def DownloadData():
     API_Interface.load()
-    return {
-        "payload" : "done",
-        "error" : None
+    return{
+        "payload":"Completed the data download",
+        "error":None
     }
 
-@app.route("/Train_Univariate")
-def Train_Univariate():
-    return {
-        "payload": "Sent",
+@app.route("/SetMLArgs",methods=['GET'])
+def SetMLArgs():
+    PyPredict.args["Epochs"]=request.args.get("Epochs",type=int)
+    PyPredict.args["Batch_Size"]=request.args.get("Batch_Size",type=int)
+    PyPredict.args["Window_Size"]=request.args.get("Window_Size",type=int)
+    PyPredict.args["Learning_Rate"]=request.args.get("Learning_Rate",type=float)
+    PyPredict.args["Train-Test-Split"]=(
+        request.args.get("Train_Ratio",type=float),
+        request.args.get("Test_Ratio",type=float),
+        request.args.get("Validation_Ratio",type=float)
+    )
+    PyPredict.args["Targeted_Ticker"]=request.args.get("Targeted_Ticker",type=str)
+    PyPredict.args["Targeted_Variable"]=request.args.get("Targeted_Variable",type=str)
+    PyPredict.args["Cell_Count"]=request.args.get("Cell_Count",type=int)
+    return{
+        "payload":"All machine learning parameters are set",
         "error": None
     }
 
-if __name__=='__main__':
-    #API_Interface.load()
-    app.run(debug=False,ssl_context=('cert.pem', 'key.pem'))
+@app.route("/TrainUniVar",methods=['GET'])
+def TrainUniVar():
+    LSTM = ML.LSTM(
+        X=[],
+        Y=[],
+        cell_count=PyPredict.args["Cell_Count"],
+        output_size=PyPredict.args["LSTM_Output_Size"],#add to react
+        layers=PyPredict.args["Layers"],#add to react
+        filename=f"{PyPredict.args['Targeted_Ticker']}_univariate.pt",
+        MTO=True if PyPredict.args["LSTM_Output_Size"]==1 else False,
+        Multivariate=False,
+        variable_count=None
+    )
+    LSTM.train()
+    LSTM.predict([])
+
+@app.route("/Normalize",methods=["GET"])
+def Normalize():
+
+    Method = request.args.get("Method")
+    Cnorm = DataHandler.Normalize(
+        PyPredict.args["NormalizationMethod"]
+    )
+
+if __name__=="__main__":
+    app.run(debug=True,ssl_context=('cert.pem', 'key.pem'))

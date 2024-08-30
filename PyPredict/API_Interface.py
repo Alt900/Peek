@@ -1,42 +1,39 @@
 import alpaca.data
-from . import args, filesystem
+from . import filesystem,args
 from . import pd, os, json
 from alpaca.data import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
-from alpaca.data.live import StockDataStream,CryptoDataStream
 from datetime import datetime
 import alpaca
 
-__client = StockHistoricalDataClient(args["alpaca_key"],args["alpaca_secret"])
 cwd=os.getcwd()
 data={}
-tickers=args["tickers"]
+
 
 def _downloader(ticker,timeframe):
+    __client = StockHistoricalDataClient(args["alpaca_key"],args["alpaca_secret"])
     try:
         from_=datetime(*args["from"])
         to=datetime(*args["to"])
-        df=json.loads(__client.get_stock_bars(
+        df=__client.get_stock_bars(
             StockBarsRequest(
                 symbol_or_symbols=ticker,
-                timeframe=timeframe,#'Day', 'Hour', 'Minute', 'Month', 'Week'
+                timeframe=timeframe,
                 start=from_,
                 end=to
             )
-        ).json())["data"][ticker]#.df.reset_index(level=[0])
-        for x in df:
-            del x["symbol"]
-        with open("TEST.json","w+") as F:
-            F.write(json.dumps(df))
-        exit()
+        ).df.reset_index(level=[0])
         df=df.drop(columns=["symbol"])
-        df.to_json(f"{os.getcwd()}{filesystem}{ticker}_data.json", orient = 'split', compression = 'infer', index = 'true')
+        df.to_json(f"{ticker}_data.json", orient = 'split', compression = 'infer', index = 'true')
         return df
-    
     except AttributeError:
         print(f"Could not download data for {ticker}, skipping")
 
+def FetchJSON(filename):
+    pass
+
 def load(timeframe=alpaca.data.timeframe.TimeFrame.Minute):
+    tickers=args["tickers"]
     DataDirectory=cwd+f"{filesystem}react_gui{filesystem}public{filesystem}Assets{filesystem}MarketData"
     os.chdir(DataDirectory)
 
@@ -71,20 +68,3 @@ def load(timeframe=alpaca.data.timeframe.TimeFrame.Minute):
         data[ticker]=df
 
     os.chdir(cwd)
-class LiveStream():
-    def __init__(self):
-        self.stock_client=StockDataStream(args["alpaca_key"],args["alpaca_secret"])
-        self.crypto_client=CryptoDataStream(args["alpaca_key"],args["alpaca_secret"])
-
-    async def stream_handler(self,data):
-        print(f"Ask ${data.ask_price} for {data.ask_size} volume\nBid ${data.bid_price} for {data.bid_size} volume\n")
-
-    
-    def open_stream(self,ticker):
-        print(f"Opening a live stream to {ticker}")
-        self.stock_client.subscribe_quotes(self.stream_handler,ticker)
-        self.stock_client.run()
-
-    def open_crypto_stream(self,ticker):
-        self.crypto_client.subscribe_quotes(self.stream_handler,ticker)
-        self.crypto_client.run()

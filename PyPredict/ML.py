@@ -1,12 +1,9 @@
 from .API_Interface import args,filesystem
-from . import torch,os
+from . import torch,os,np
+import ctypes
 
-window_size = args["ML"][0]["windowsize"]
-plot_loss = args["ML"][0]["plot_loss"]
-epochs = args["ML"][0]["epochs"]
-
-if plot_loss:
-    from . import plt
+window_size = args["Window_Size"]
+epochs = args["Epochs"]
 
 device = (
     "cuda"#NVIDIA GPU
@@ -96,10 +93,6 @@ class LSTM():
                 self.optimizer.step()#begin optimization
 
             print(f"epoch - {epoch}\nRMSE loss: {loss}")
-            if plot_loss:
-                if epoch==0:
-                    compiled_loss=[]
-                compiled_loss.append(loss)
 
             if epoch%100!=0:#if the epoch is 0, the first training iteration, then the gradient will be zerod/initialized for backprop
                 continue
@@ -114,27 +107,8 @@ class LSTM():
 
             print(f"epoch - {epoch}\nTrain RMSE: {train_rmse}\nTest RMSE: {test_rmse}")
 
-        if plot_loss:
-            for i in range(epochs):
-                c='g' if compiled_loss[i-1]>compiled_loss[i] else 'r'
-                if i!=0:
-                    plt.plot(
-                        [i-1,i],
-                        [float(compiled_loss[i-1]),float(compiled_loss[i])],
-                        color=c
-                    )
-                else:
-                    plt.scatter(
-                        i,
-                        float(compiled_loss[i]),
-                        color=c
-                    )
-            plt.title("RMSE loss")
-            plt.savefig(f"Graphs{filesystem}RMSE_Loss.png")
-            plt.close()
-
         if args["ML"][0]["save_model"]:
-            torch.save(self.model.state_dict(),f"{os.getcwd()}{filesystem}Assets{filesystem}Models{filesystem}{self.filename}.pt")
+            torch.save(self.model.state_dict(),f"{os.getcwd()}{filesystem}Assets{filesystem}Models{filesystem}{self.filename}")
 
     def predict(self,x):
         predicted=self.model(torch.tensor(x))

@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "stdio.h": "c",
-        "cjson.h": "c"
+        "cjson.h": "c",
+        "stdlib.h": "c",
+        "xstring": "c",
+        "xutility": "c"
     }
 }
