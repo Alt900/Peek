@@ -13,29 +13,30 @@ data={}
 def _downloader(ticker,timeframe):
     __client = StockHistoricalDataClient(args["alpaca_key"],args["alpaca_secret"])
     try:
-        from_=datetime(*args["from"])
-        to=datetime(*args["to"])
-        df=__client.get_stock_bars(
+        data=json.loads(__client.get_stock_bars(
             StockBarsRequest(
                 symbol_or_symbols=ticker,
                 timeframe=timeframe,
-                start=from_,
-                end=to
+                start=datetime(*args["from"]),
+                end=datetime(*args["to"])
             )
-        ).df.reset_index(level=[0])
-        df=df.drop(columns=["symbol"])
-        df.to_json(f"{ticker}_data.json", orient = 'split', compression = 'infer', index = 'true')
-        return df
+        ).json())["data"][ticker]
+        print(type(data))
+        print(data[0:40])
+        with open(f"{ticker}_data.json","w+") as F:
+            json.dump(data,F)
     except AttributeError:
         print(f"Could not download data for {ticker}, skipping")
 
-def FetchJSON(filename):
-    pass
+def FetchJSON(ticker):
+    with open(f"{ticker}_data.json","r") as F:
+        return json.load(F)
 
 def load(timeframe=alpaca.data.timeframe.TimeFrame.Minute):
     tickers=args["tickers"]
     DataDirectory=cwd+f"{filesystem}react_gui{filesystem}public{filesystem}Assets{filesystem}MarketData"
     os.chdir(DataDirectory)
+    print(os.getcwd())
 
     #check for cache arg and cached files
     Cached=[x.split("_")[0] for x in os.listdir(DataDirectory)]
@@ -50,6 +51,7 @@ def load(timeframe=alpaca.data.timeframe.TimeFrame.Minute):
         todownload=tickers
         print(f"Found pre-existing data for the following tickers, cache omitted, overwriting existing data for:\n{Cached}.")
 
+    print(f"---\n\n{tickers}\n\n---")
 
     if len(todownload)>0:
         print("Downloading...")

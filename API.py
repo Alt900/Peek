@@ -14,11 +14,12 @@ CORS(app)
 
 @app.route("/SetDownloadArgs",methods=['GET'])
 def SetDownloadArgs():
-    PyPredict.args["Alpaca_key"]=request.args.get("Alpaca_key",type=str)
-    PyPredict.args["Alpaca_Secret"]=request.args.get("Alpaca_secret",type=str)
-    PyPredict.args["Tickers"]=request.args.getlist("Tickers")[0]
-    PyPredict.args["from"]=request.args.getlist("from")[0]
-    PyPredict.args["to"]=request.args.getlist("to")[0]
+    PyPredict.args["alpaca_key"]=request.args.get("Alpaca_key",type=str)
+    PyPredict.args["alpaca_secret"]=request.args.get("Alpaca_secret",type=str)
+    PyPredict.args["tickers"]=json.loads(request.args.getlist("Tickers")[0])
+    PyPredict.args["from"]=json.loads(request.args.getlist("from")[0])
+    PyPredict.args["to"]=json.loads(request.args.getlist("to")[0])
+    print(type(PyPredict.args["to"]))
     return{
         "payload": "All download parameters are set",
         "error":None
@@ -28,7 +29,15 @@ def SetDownloadArgs():
 def DownloadData():
     API_Interface.load()
     return{
-        "payload":"Completed the data download",
+        "payload":PyPredict.args["tickers"],
+        "error":None
+    }
+
+@app.route("/FetchTickerData",methods=['GET'])
+def FetchTickerData():
+    data=API_Interface.FetchJSON(request.args.get("Ticker",type=str))
+    return{
+        "payload":data,
         "error":None
     }
 

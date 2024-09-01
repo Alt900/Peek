@@ -1,7 +1,7 @@
-import React, { useReducer, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import Dropdown from 'react-dropdown';
 import Calendar from 'react-calendar';
-import { AxisOptions, Chart } from "react-charts";
+import { Chart } from "react-charts";
 
 
 function Dashboard(){
@@ -10,7 +10,9 @@ function Dashboard(){
 
     const [DashboardSelected,SetDashboardSelected] = useState("ML_State");
 
-    const [payload,setpayload] = useState(null);
+    let Datafile_Options = [""];
+
+    const [Selected_Datafile,Set_Selected_Datafile] = useState(null);
 
     const DashboardObj = {
         Epochs: 100,
@@ -31,8 +33,9 @@ function Dashboard(){
         Alpaca_key: "",
         Alpaca_secret: "",
         SelectedCalendar: "From",
-        Tickers: "[\nNVDA,\nMSFT\n]",
-        payload: null,
+        Tickers: ["LMT","NVDA"],
+        Temp_Ticker: "",
+        Data_Payload: null,
 
         
         OPENQASM_Script: "OPENQASM 2.0;\ninclude 'qelib1.inc';\ncreg q[4];\ncreg c[4];"
@@ -52,11 +55,16 @@ function Dashboard(){
                 const month = date.getMonth() + 1;
                 const day = date.getDate();
                 const datelist = [year, month, day];
-                return {...state,[action.payload.key]:datelist,[action.payload.key+"DateObject"]:date}
+                return {...state,[action.payload.key]:datelist,[action.payload.key+"DateObject"]:date};
             case "Dropdown":
-                return{...state,[action.payload.key]:action.payload.target}
+                return{...state,[action.payload.key]:action.payload.target};
+            case "AppendList":
+                return{...state,[action.payload.key]:[...(state[action.payload.key] || []), action.payload]};
+            case "RemoveList":
+                //access sub-state        //copy the list and remove the target item by index, keep the rest of the list
+                return{...state,[action.payload.key]:state[action.payload.key].filter((_,i)=>i!==action.listindex)};
             default:
-                return {...state,[action.payload.key]:action.payload.target.value}
+                return {...state,[action.payload.key]:action.payload.target.value};
         }
     }
 
@@ -76,8 +84,7 @@ function Dashboard(){
         &Validation_Ratio=${DashboardState.Validation_Ratio}
         &Cell_Count=${DashboardState.Cell_Count}`,
 
-        "SetDownloadArgs":`https:127.0.0.1:5000/SetDownloadArgs?
-        Tickers=${DashboardState.Tickers}
+        "SetDownloadArgs":`https:127.0.0.1:5000/SetDownloadArgs?Tickers=${DashboardState.Tickers}
         &Alpaca_key=${DashboardState.Alpaca_key}
         &Alpaca_secret=${DashboardState.Alpaca_secret}
         &from=[${DashboardState.From}]
@@ -89,7 +96,8 @@ function Dashboard(){
     const DashboardStateHandler = (newstate,SpecialCase=null) => {
         DashboardDispatcher({
             type:SpecialCase,
-            payload:newstate
+            payload:newstate,
+            listindex:null
         });
     }
 
@@ -111,11 +119,35 @@ function Dashboard(){
                 console.error(`There was an error fetching a rout to ${RequestedRout}`)
             }
             const data = await resp.json();
-            setpayload(data);
+            DashboardState["Data_Payload"]=data;
         } catch (err){
-            console.log(`There was an error reading the response json\n${err}`);
+            console.error(`There was an error reading the response\n${err}`);
         }
     };
+
+    const AppendTicker = (event) => {
+        DashboardStateHandler({
+            key:"Tickers",
+            target:event
+        },"AppendList")
+        DashboardStateHandler({
+            key:"Temp_Ticker",
+            target:""
+        })
+        DashboardState.Tickers.push(DashboardState.Temp_Ticker);
+        DashboardState.Temp_Ticker="";
+    }
+
+    const ReadJSON = () => {
+        useEffect(()=>{
+            try{
+                const data = fetch(DashboardState.Chosen_Datafile);
+                data = data.json(); 
+            } catch(err){
+                console.error(`There was an error reading the JSON file\n${err}`);
+            }
+        });
+    }
 
     const RenderCalendar = () => {
         switch(DashboardState.SelectedCalendar){
@@ -141,7 +173,21 @@ function Dashboard(){
     };
 
     function RenderAreaChart(){
-        
+
+        const PrimaryAxis = React.useMemo(()=>({
+            getValue: (datenum) => datenum.primary,
+        }),[]);
+
+        const SecondaryAxis = React.useMemo(()=>[{
+            getValue: (datenum) => datenum.secondary,
+            stacked: true,
+        }],[]);
+        const data = DashboardState.Data_Payload
+        return(
+            <Chart
+            options={{data,PrimaryAxis,SecondaryAxis}}
+            />
+        )
     }
 
 
@@ -236,30 +282,66 @@ function Dashboard(){
             default:
                 return(
                     <div className="Download_Dash">
-                        <Dropdown
-                            className = "Calendar_Nav"
-                            options={CalendarOptions}
-                            onChange={(event)=>{DashboardStateHandler({key:"SelectedCalendar",target:event.value},"Dropdown",DashboardState.SelectedCalendar)}}
-                            value={DashboardState.SelectedCalendar}//always returns undefined
-                            placeholder={CalendarOptions[0]}
-                        />
-                        {RenderCalendar()}
                         <div className="Download_Options">
-                            <div className="Tickers_Container">
-                                <h5 className="Ticker_Label">Tickers:</h5>
+                            <div className="TickerInput">
+                                <input
+                                    className="Temp_Ticker"
+                                    name="Temp_Ticker"
+                                    value={DashboardState.Temp_Ticker}
+                                    onChange={(event)=>{DashboardStateHandler({key:"Temp_Ticker",target:event.target})}}
+                                />
+                                <button
+                                    className="AppendTicker"
+                                    onClick={AppendTicker()}
+                                >Add</button>
+
                                 <textarea
-                                className="Tickers_Input"
+                                className="CurrentTickers"
                                 name="Tickers"
-                                onChange={(event)=>{DashboardStateHandler({key:"Tickers",target:event.target})}}
-                                value={DashboardState.Tickers}
-                                >
-                                </textarea>
+                                value={DashboardState.Tickers}/>
                             </div>
+                            <h5 className="keylabel">API key</h5>
+                            <input
+                            className="key"
+                            name="Alpaca_key"
+                            value={DashboardState.Alpaca_key}
+                            onChange={(event)=>{DashboardStateHandler({key:"Alpaca_key",target:event.target})}}
+                            ></input>
+                            <h5 className="secretlabel">API secret</h5>
+                            <input
+                            className="secret"
+                            name="Alpaca_secret"
+                            value={DashboardState.Alpaca_secret}
+                            onChange={(event)=>{DashboardStateHandler({key:"Alpaca_secret",target:event.target})}}
+                            ></input>
                             <button
                             className="DownloadTickers"
-                            onClick={()=>{HandleRouter("Download_Data")}}
+                            onClick={()=>{
+                                HandleRouter("SetDownloadArgs");
+                                HandleRouter("DownloadData");
+                            }}
                             >Download
                             </button>
+                            <Dropdown
+                                className = "Calendar_Nav"
+                                options={CalendarOptions}
+                                onChange={(event)=>{DashboardStateHandler({key:"SelectedCalendar",target:event.value},"Dropdown",DashboardState.SelectedCalendar)}}
+                                value={DashboardState.SelectedCalendar}//always returns undefined
+                                placeholder={CalendarOptions[0]}
+                            />
+                            {RenderCalendar()}
+                        </div>
+                        <div className="DataDisplay">
+                            <Dropdown
+                                className="Datafile_Nav"
+                                options={Datafile_Options}
+                                onChange={(event)=>{
+                                    Set_Selected_Datafile(event);
+                                    ReadJSON()
+                                }}
+                                value={Selected_Datafile}
+                                placeholder={Datafile_Options[0]}
+                            />
                         </div>
                     </div>
                 )

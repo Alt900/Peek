@@ -203,16 +203,6 @@ code {
   left: 0;
 }
 
-.DownloadTickers{
-  position: absolute;
-  width: 10%;
-  height: 5%;
-  right: 0;
-  top: 3%;
-  background-color: transparent;
-  color: gray;
-}
-
 .Calendar_Nav{
   position: absolute;
   top: 55%;
@@ -237,34 +227,126 @@ code {
   height: 30%;
 }
 
-.Tickers_Container{
+.TickerInput{
   position: absolute;
-  top: 10%;
-  width: 10%;
-  height: 40%;
+  top: 0;
   right: 0;
+  width: 50%;
+  height: 50%;
   border: 2px;
-  border-color: gray;
   border-style: solid;
+  border-color: gray;
+}
+
+.Temp_Ticker{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 60%;
+  height: 10%;
+  color: gray;
+  background-color: transparent;
+  border: 2px;
+  border-style: solid;
+  border-color: gray;
+}
+
+.AppendTicker{
+  position: absolute;
+  right: -2%;
+  top: -1%;
+  height: 12%;
+  width: 40%;
+  border: 1px;
+  border-color: black;
+  border-style: solid;
+  background-color: white;
   color: gray;
 }
 
-.Tickers_Input{
+.CurrentTickers{
   position: absolute;
+  left: 0;
   bottom: 0;
-  width: 96%;
-  height: 90%;
+  width: 100%;
+  height: 87%;
   background-color: transparent;
   color: gray;
 }
 
-.Ticker_Label{
+.DownloadTickers{
   position: absolute;
-  top: -6%;
-  height: 10%;
-  width: 100%;
+  width: 50%;
+  height: 5%;
+  left: 0;
+  top: 18%;
+  background-color: transparent;
   color: gray;
 }
+
+.Download_Options{
+  position: absolute;
+  overflow: hidden;
+  right: 0;
+  top: 2%;
+  width: 30%;
+  height: 100%;
+  background-color: transparent;
+  border: 2px;
+  border-style: solid;
+  border-color: gray;
+}
+
+.keylabel{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20%;
+  height: 5%;
+  color: gray;
+}
+
+.key{
+  position: absolute;
+  left: 0;
+  top: 5%;
+  width: 48%;
+  height: 3%;
+  color: gray;
+  background-color: transparent;
+}
+
+.secretlabel{
+  position: absolute;
+  left: 0;
+  top: 8%;
+  color: gray;
+  width: 50%;
+  height: 5%;
+}
+
+.secret{
+  position: absolute;
+  left: 0;
+  top: 13%;
+  height: 3%;
+  width: 48%;
+  color: gray;
+  background-color: transparent;
+}
+
+.DataDisplay{
+  position: absolute;
+  top: 2%;
+  left: -.5%;
+  width: 70%;
+  height: 100%;
+  border: 2px;
+  border-style: solid;
+  border-color: gray;
+}
+
+
 
 /*
 
