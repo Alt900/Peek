@@ -1,7 +1,19 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useReducer, useState } from "react";
 import Dropdown from 'react-dropdown';
 import Calendar from 'react-calendar';
-import { Chart } from "react-charts";
+
+import CircuitSrc from './Graphs/Quantum_Circuit.png';
+
+
+const DYN_IMG = () => {
+    return(
+        <img
+            className="Circuit_Image"
+            src = {CircuitSrc}
+            alt="No quantum circuit has been ran yet"
+        />
+    )
+}
 
 
 function Dashboard(){
@@ -10,11 +22,30 @@ function Dashboard(){
 
     const [DashboardSelected,SetDashboardSelected] = useState("ML_State");
 
-    let Datafile_Options = [""];
+    const Statistics_Object = {
+        Selected_LR: "Classic",
+        Endo: null,
+        Exo: null,
+        Variables:[
+            "Open",
+            "High",
+            "Low",
+            "Close",
+            "Volume",
+            "Trade_Count",
+            "VWAP"
+        ],
+        LR_Models: [
+            "Classic",
+            "Theta",
+            "OLS",
+            "ARIMA"
+        ],
+        Order: [0,0,0],
+        Seasonal_Order: [0,0,0,0]
+    }
 
-    const [Selected_Datafile,Set_Selected_Datafile] = useState(null);
-
-    const DashboardObj = {
+    const ML_Object = {
         Epochs: 100,
         Batch_Size: 32,
         Window_Size: 5,
@@ -25,7 +56,17 @@ function Dashboard(){
         Test_Ratio: 0.2,
         Validation_Ratio: 0.1,
         Cell_Count: 10,
+        Model_Results: null,
+        NormalMethods:[
+            "Logarithmic",
+            "Z Score",
+            "Min Max",
+            "Difference"
+        ],
+        ChosenNormal:""
+    }
 
+    const Download_Object = {
         To: null,
         From: null,
         ToDateObject: null,
@@ -36,12 +77,16 @@ function Dashboard(){
         Tickers: ["LMT","NVDA"],
         Temp_Ticker: "",
         Data_Payload: null,
-
-        
-        OPENQASM_Script: "OPENQASM 2.0;\ninclude 'qelib1.inc';\ncreg q[4];\ncreg c[4];"
+        Datafile_Options: ["BA_data.json","BBAI_data.json","BIDU_data.json"],
+        Selected_DataFile: null
     }
 
-    function DashboardReducer (state,action){
+    const Quantum_Object = {
+        OPENQASM_Script: "OPENQASM 2.0;\ninclude 'qelib1.inc';\nqreg q[4];\ncreg c[4];",
+        QASM_Result: ""
+    }
+
+    function Object_Reducer (state,action){
         switch(action.type){
             case "IntOnly":
                 const regex = /^-?\d*$/;
@@ -58,46 +103,74 @@ function Dashboard(){
                 return {...state,[action.payload.key]:datelist,[action.payload.key+"DateObject"]:date};
             case "Dropdown":
                 return{...state,[action.payload.key]:action.payload.target};
-            case "AppendList":
-                return{...state,[action.payload.key]:[...(state[action.payload.key] || []), action.payload]};
-            case "RemoveList":
-                //access sub-state        //copy the list and remove the target item by index, keep the rest of the list
-                return{...state,[action.payload.key]:state[action.payload.key].filter((_,i)=>i!==action.listindex)};
+            case "AppendTickers":
+                console.log(action.payload.target);
+                return{...state,[action.payload.key]:[...action.payload.target[0],action.payload.target[1]]};
+            case "API_Route":
+                return{...state,[action.key]:action.payload}
             default:
                 return {...state,[action.payload.key]:action.payload.target.value};
         }
     }
 
-    const [DashboardState,DashboardDispatcher] = useReducer(DashboardReducer,DashboardObj);
+    const [ML_State,Set_MLState] = useReducer(Object_Reducer,ML_Object);
+    const [Statistics_State,Set_StatisticsState] = useReducer(Object_Reducer,Statistics_Object);
+    const [Download_State,Set_DownloadState] = useReducer(Object_Reducer,Download_Object);
+    const [Quantum_State,Set_QuantumState] = useReducer(Object_Reducer,Quantum_Object);
 
-    const API_Router = {
+    const ML_Router = {
         
         "SetMLArgs": `https://127.0.0.1:5000/SetMLArgs?
-        Epochs=${DashboardState.Epochs}
-        &Batch_Size=${DashboardState.Batch_Size}
-        &Learning_Rate=${DashboardState.Learning_Rate}
-        &Window_Size=${DashboardState.Window_Size}
-        &Targeted_Ticker=${DashboardState.Targeted_Ticker}
-        &Targeted_Variable=${DashboardState.Targeted_Variable}
-        &Train_Ratio=${DashboardState.Train_Ratio}
-        &Test_Ratio=${DashboardState.Test_Ratio}
-        &Validation_Ratio=${DashboardState.Validation_Ratio}
-        &Cell_Count=${DashboardState.Cell_Count}`,
+        Epochs=${ML_State.Epochs}
+        &Batch_Size=${ML_State.Batch_Size}
+        &Learning_Rate=${ML_State.Learning_Rate}
+        &Window_Size=${ML_State.Window_Size}
+        &Targeted_Ticker=${ML_State.Targeted_Ticker}
+        &Targeted_Variable=${ML_State.Targeted_Variable}
+        &Train_Ratio=${ML_State.Train_Ratio}
+        &Test_Ratio=${ML_State.Test_Ratio}
+        &Validation_Ratio=${ML_State.Validation_Ratio}
+        &Cell_Count=${ML_State.Cell_Count}
+        &Normalization_Method=${ML_State.ChosenNormal}
+        `,
 
-        "SetDownloadArgs":`https:127.0.0.1:5000/SetDownloadArgs?Tickers=${DashboardState.Tickers}
-        &Alpaca_key=${DashboardState.Alpaca_key}
-        &Alpaca_secret=${DashboardState.Alpaca_secret}
-        &from=[${DashboardState.From}]
-        &to=[${DashboardState.To}]`,
+        "Train_Univar": `https://127.0.0.1:5000/Train_Univar`,
+        "Normalize": `https:127.0.0.1:5000/Normalize?method=${ML_State.ChosenNormal}`
 
-        "DownloadData":"https://127.0.0.1:5000/DownloadData"
     }
 
-    const DashboardStateHandler = (newstate,SpecialCase=null) => {
-        DashboardDispatcher({
+    const Data_Router = {
+        "SetDownloadArgs":`https:127.0.0.1:5000/SetDownloadArgs?Tickers=${Download_State.Tickers}
+        &Alpaca_key=${Download_State.Alpaca_key}
+        &Alpaca_secret=${Download_State.Alpaca_secret}
+        &from=[${Download_State.From}]
+        &to=[${Download_State.To}]`,
+
+        "DownloadData":"https://127.0.0.1:5000/DownloadData",
+    }
+
+    const Statistics_Router = {
+        "Set_Exo_Endo": `https://127.0.0.1:5000/Set_Exo_Endo?
+        Endo=${Statistics_State.Endo}
+        &Exo=${Statistics_State.Exo}
+        `,
+        "Set_ARIMA_Params": `https://127.0.0.1:5000/Set_ARIMA_Params?
+        Order=[${Statistics_State.Order}]
+        &Seasonal_Order=[${Statistics_State.Seasonal_Order}]
+        `,
+        "LR_Fit": `https://127.0.0.1:5000/Fit_Model?Model=${Statistics_State.Selected_LR}`,
+        "LR_Predict": `https://127.0.0.1:5000/Model_Predict?Model=${Statistics_State.Selected_LR}`//will predict with exo
+    }
+
+    const Quantum_Router = {
+        "QASM_Result":`https:///127.0.0.1:5000/Run_QASM?Script=${Quantum_State.OPENQASM_Script}`,
+        "Grovers_Result":`https://127.0.0.1:5000/Run_Grovers`
+    }
+
+    const StateObject_Handler = (newstate,Disbatcher,SpecialCase=null) => {
+        Disbatcher({
             type:SpecialCase,
-            payload:newstate,
-            listindex:null
+            payload:newstate
         });
     }
 
@@ -106,58 +179,58 @@ function Dashboard(){
         RenderDashboard();
     };
 
-
-
-    const HandleRouter = (RequestedRout) => {
-        Router(RequestedRout);
-    }
-
-    const Router = async (RequestedRout)=>{
+    async function FetchRoute(Router,Dispatcher,RequestedRoute,state_key=null){
         try{
-            const resp = await fetch(API_Router[RequestedRout]);
+            const resp = await fetch(Router[RequestedRoute]);
             if (!resp.ok){
-                console.error(`There was an error fetching a rout to ${RequestedRout}`)
+                console.error(`There was an error fetching a rout to ${RequestedRoute}`)
             }
-            const data = await resp.json();
-            DashboardState["Data_Payload"]=data;
+            let data = await resp.json();
+            if (Dispatcher===null){
+                console.log(`No dispatcher provided, throwing out payload for ${RequestedRoute}`);
+            } else {
+                Dispatcher({
+                    type:"API_Route",
+                    payload: data.payload,
+                    key: state_key
+                });
+            }
         } catch (err){
             console.error(`There was an error reading the response\n${err}`);
         }
     };
 
-    const AppendTicker = (event) => {
-        DashboardStateHandler({
-            key:"Tickers",
-            target:event
-        },"AppendList")
-        DashboardStateHandler({
-            key:"Temp_Ticker",
-            target:""
-        })
-        DashboardState.Tickers.push(DashboardState.Temp_Ticker);
-        DashboardState.Temp_Ticker="";
-    }
-
-    const ReadJSON = () => {
-        useEffect(()=>{
-            try{
-                const data = fetch(DashboardState.Chosen_Datafile);
-                data = data.json(); 
-            } catch(err){
-                console.error(`There was an error reading the JSON file\n${err}`);
+    async function FetchJSON(){
+        try{
+            const resp = await fetch(`http://localhost:3000/Assets/MarketData/${Download_State.Selected_DataFile}`);
+            if (!resp.ok){
+                console.error(`There was an error fetching JSON from ${Download_State.Selected_DataFile}`)
             }
-        });
-    }
+            let data = await resp.json();
+            StateObject_Handler({
+                type:"API_Route",
+                payload: data.payload
+            })
+        } catch (err){
+            console.error(`There was an error reading the response\n${err}`);
+        }
+    };
 
     const RenderCalendar = () => {
-        switch(DashboardState.SelectedCalendar){
+        switch(Download_State.SelectedCalendar){
             case "From":
                 return(
                     <Calendar 
                         className="DownloadFrom"
                         name="FromDateObject"
-                        onChange={(event)=>{DashboardStateHandler({key:"From",target:event},"Date");console.log(DashboardState.FromDateObject);}} 
-                        value={DashboardState.FromDateObject}
+                        onChange={
+                            (event)=>{
+                                StateObject_Handler(
+                                    {key:"From",target:event},
+                                    Set_DownloadState,
+                                    "Date",
+                                )}}
+                        value={Download_State.FromDateObject}
                     />
                 )
             default:
@@ -165,35 +238,18 @@ function Dashboard(){
                     <Calendar
                         className="DownloadTo"
                         name="ToDateObject"
-                        onChange={(event)=>{DashboardStateHandler({key:"To",target:event},"Date")}} 
-                        value={DashboardState.ToDateObject}
+                        onChange={
+                            (event)=>{
+                                StateObject_Handler(
+                                    {key:"To",target:event},
+                                    Set_DownloadState,
+                                    "Date",
+                                )}}
+                        value={Download_State.ToDateObject}
                     />
                 )
         }
     };
-
-    function RenderAreaChart(){
-
-        const PrimaryAxis = React.useMemo(()=>({
-            getValue: (datenum) => datenum.primary,
-        }),[]);
-
-        const SecondaryAxis = React.useMemo(()=>[{
-            getValue: (datenum) => datenum.secondary,
-            stacked: true,
-        }],[]);
-        const data = DashboardState.Data_Payload
-        return(
-            <Chart
-            options={{data,PrimaryAxis,SecondaryAxis}}
-            />
-        )
-    }
-
-
-    function RenderNetworkMap(){}
-
-    function RenderQuantumMap(){}
 
 
     //for train univariate LSTM and Multivariate LSTM 
@@ -211,13 +267,16 @@ function Dashboard(){
                     <div className="ML_Operations">
                         <button 
                             className="MLOpButtons" 
-                            onClick={()=>{HandleRouter("SetMLArgs")}}
+                            onClick={()=>{
+                                FetchRoute(ML_Router,null,"SetMLArgs");
+                                FetchRoute(ML_Router,Set_MLState,"Train_Univar","Model_Results");
+                            }}
                             style={{top:"0",left:"0"}}
                             >Train Univariate LSTM
                         </button>
                         <button
                             className="MLOpButtons"
-                            onClick={()=>{HandleRouter("Train_Multivariate")}}
+                            onClick={()=>{FetchRoute(ML_Router,null,"Train_Multivariate")}}
                             style={{top:"10%",left:"0"}}
                         >Train Multivariate LSTM
                         </button>
@@ -247,36 +306,155 @@ function Dashboard(){
                                     <input
                                     className="ML_Input"
                                     name={key}
-                                    value={DashboardState[key]}
-                                    onChange={(event)=>{DashboardStateHandler({key:key,target:event.target},typeof DashboardState[key]=="number"?"IntOnly":"null")}}
+                                    value={ML_State[key]}
+                                    onChange={
+                                        (event)=>{
+                                            StateObject_Handler(
+                                                {key:key,target:event.target},Set_MLState,typeof ML_State[key]=="number"?"IntOnly":"null"
+                                            )}
+                                        }
                                     >
                                     </input>
                                 </div>
                             )
                         })}
+                    <Dropdown
+                        className="Normalization_Method"
+                        options={ML_State.NormalMethods}
+                        onChange={
+                            (NewNorm)=>{
+                                StateObject_Handler({
+                                    key:"ChosenNormal",
+                                    target:NewNorm
+                                },Set_MLState)
+                            }
+                        }
+                        value={ML_State.ChosenNormal}
+                        placeholder={ML_State.NormalMethods[0]}
+                    />
                     </div>
                 </div>)
     
             case "Statistics":
                 return(
-                    <div className="Statistics_dash">
+                    <div>
+                        <div className="Stats_Operations">
+                            <div className="Linear_Regression">
+                                <h5 className="Exo_Label">Exogenous</h5>
+                                <Dropdown
+                                    className="Exo"
+                                    options={Statistics_State.Variables.filter(_var => _var !== Statistics_State.Endo)}
+                                    onChange={
+                                        (NewExo)=>{
+                                            StateObject_Handler(
+                                                {key:"Exo",target:NewExo},
+                                                Set_StatisticsState
+                                            )
+                                        }
+                                    }
+                                    value={Statistics_State.Exo}
+                                    placeholder={Statistics_State.Variables[0]}
+                                />
+                                <h5 className="Endo_Label">Endogenous</h5>
+                                <Dropdown
+                                    className="Endo"
+                                    options={Statistics_State.Variables.filter(_var => _var !== Statistics_State.Exo)}
+                                    onChange={
+                                        (NewEndo)=>{
+                                            StateObject_Handler(
+                                                {key:"Endo",target:NewEndo},
+                                                Set_StatisticsState
+                                            )
+                                        }
+                                    }
+                                    value={Statistics_State.Endo}
+                                    placeholder={Statistics_State.Variables[0]}
+                                />
+                                <h5 className="Selected_LR_Label">Linear Regression model</h5>
+                                <Dropdown
+                                    className="Selected_LR"
+                                    options={Statistics_State.LR_Models}
+                                    onChange={
+                                        (NewModel)=>{
+                                            StateObject_Handler(
+                                                {key:"Selected_LR",target:NewModel},
+                                                Set_StatisticsState
+                                            )
+                                        }
+                                    }
+                                    value={Statistics_State.Selected_LR}
+                                    placeholder={Statistics_State.LR_Models[0]}
+                                />
+                                <button
+                                    className="Fit_Model"
+                                    onClick={
+                                        ()=>{
+                                            FetchRoute(Statistics_Router,"Fit_LR")
+                                        }
+                                    }
+                                >Fit {Statistics_State.Selected_LR} model</button>
+                                <button
+                                    className="Model_Predict"
+                                    onClick={
+                                        ()=>{
+                                            FetchRoute(Statistics_Router,"LR_Predict")
+                                        }
+                                    }
+                                >Predict {Statistics_State.Selected_LR} model</button>
+                            </div>
+                        </div>
                     </div>
                 )
 
             case "Quantum":
                 return (
-                    <div className="QuantumDash">
+                    <>
                         <div className="QASM_editor">
+                            <h4 className="QASM_Title">OPEN QASM 2.0 Editor</h4>
                             <textarea 
                             className="QASM"
                             name="OPENQASM_Script"
-                            onChange={(event)=>{DashboardStateHandler({key:"OPENQASM_Script",target:event.target},"null")}}
-                            value={DashboardState.OPENQASM_Script}
+                            onChange={
+                                (event)=>{
+                                    StateObject_Handler(
+                                        {key:"OPENQASM_Script",target:event.target},
+                                        Set_QuantumState
+                                    )}
+                                }
+                            value={Quantum_State.OPENQASM_Script}
                             >
                             </textarea>
-                            <h4 className="QASM_Title">OPEN QASM 2.0 Editor</h4>
+                            <button
+                            className="Run_QASM"
+                            onClick={
+                                ()=>{
+                                    FetchRoute(Quantum_Router,Set_QuantumState,"QASM_Result","QASM_Result");
+                                    console.log(Quantum_State.QASM_Result)
+                                }
+                            }
+                            >Run QASM Script</button>
+                            <textarea
+                            className="QASM_Result"
+                            name="QASM_Result"
+                            value={
+                                Quantum_State.QASM_Result===""?
+                                "No QASM script has been ran yet":
+                                `${Object.keys(Quantum_State.QASM_Result)}\n${"_ _ _ ".repeat(Object.keys(Quantum_State.QASM_Result).length)}\n\n${Object.values(Quantum_State.QASM_Result)}`
+                            }
+                            />
+                            <button
+                                className="Grovers_Algorithm"
+                                onClick={
+                                    ()=>{
+                                        FetchRoute(Quantum_Router,Set_QuantumState,"Grovers_Result","QASM_Result")
+                                    }
+                                }
+                            >Run Grovers algorithm</button>
                         </div>
-                    </div>
+                        <div className="Circuit_Display">
+                            <DYN_IMG/>
+                        </div>
+                    </>
                 )
     
             default:
@@ -287,46 +465,81 @@ function Dashboard(){
                                 <input
                                     className="Temp_Ticker"
                                     name="Temp_Ticker"
-                                    value={DashboardState.Temp_Ticker}
-                                    onChange={(event)=>{DashboardStateHandler({key:"Temp_Ticker",target:event.target})}}
+                                    value={Download_State.Temp_Ticker}
+                                    onChange={
+                                        (event)=>{
+                                            StateObject_Handler(
+                                                {key:"Temp_Ticker",target:event.target},
+                                                Set_DownloadState
+                                            )}
+                                        }
                                 />
                                 <button
-                                    className="AppendTicker"
-                                    onClick={AppendTicker()}
+                                className="AppendTicker"
+                                onClick={
+                                    ()=>{
+                                        if (Download_State.Temp_Ticker.length===3 || Download_State.Temp_Ticker.length===4){
+                                            StateObject_Handler({
+                                                key:"Tickers",
+                                                target:[Download_State.Tickers,Download_State.Temp_Ticker]
+                                            },Set_DownloadState,"AppendTickers");
+                                            StateObject_Handler({
+                                                key:"Temp_Ticker",
+                                                target:""
+                                            },Set_DownloadState);
+                                        }
+                                    }
+                                }
                                 >Add</button>
-
                                 <textarea
                                 className="CurrentTickers"
                                 name="Tickers"
-                                value={DashboardState.Tickers}/>
+                                value={Download_State.Tickers}/>
                             </div>
                             <h5 className="keylabel">API key</h5>
                             <input
                             className="key"
                             name="Alpaca_key"
-                            value={DashboardState.Alpaca_key}
-                            onChange={(event)=>{DashboardStateHandler({key:"Alpaca_key",target:event.target})}}
+                            value={Download_State.Alpaca_key}
+                            onChange={
+                                (event)=>{
+                                    StateObject_Handler(
+                                        {key:"Alpaca_key",target:event.target},
+                                        Set_DownloadState
+                                    )}
+                                }
                             ></input>
                             <h5 className="secretlabel">API secret</h5>
                             <input
                             className="secret"
                             name="Alpaca_secret"
-                            value={DashboardState.Alpaca_secret}
-                            onChange={(event)=>{DashboardStateHandler({key:"Alpaca_secret",target:event.target})}}
+                            value={Download_State.Alpaca_secret}
+                            onChange={
+                                (event)=>{
+                                    StateObject_Handler(
+                                        {key:"Alpaca_secret",target:event.target},
+                                        Set_DownloadState
+                                    )}
+                                }
                             ></input>
                             <button
                             className="DownloadTickers"
                             onClick={()=>{
-                                HandleRouter("SetDownloadArgs");
-                                HandleRouter("DownloadData");
+                                FetchRoute(Data_Router,"SetDownloadArgs");
+                                FetchRoute(Data_Router,"DownloadData");
                             }}
                             >Download
                             </button>
                             <Dropdown
                                 className = "Calendar_Nav"
                                 options={CalendarOptions}
-                                onChange={(event)=>{DashboardStateHandler({key:"SelectedCalendar",target:event.value},"Dropdown",DashboardState.SelectedCalendar)}}
-                                value={DashboardState.SelectedCalendar}//always returns undefined
+                                onChange={
+                                    (event)=>{
+                                        StateObject_Handler(
+                                            {key:"SelectedCalendar",target:event.value},Set_DownloadState,"Dropdown"
+                                        )}
+                                    }
+                                value={Download_State.SelectedCalendar}//always returns undefined
                                 placeholder={CalendarOptions[0]}
                             />
                             {RenderCalendar()}
@@ -334,13 +547,14 @@ function Dashboard(){
                         <div className="DataDisplay">
                             <Dropdown
                                 className="Datafile_Nav"
-                                options={Datafile_Options}
-                                onChange={(event)=>{
-                                    Set_Selected_Datafile(event);
-                                    ReadJSON()
-                                }}
-                                value={Selected_Datafile}
-                                placeholder={Datafile_Options[0]}
+                                options={Download_State.Datafile_Options}
+                                onChange={
+                                    ()=>{
+                                        FetchJSON()
+                                    }
+                                }
+                                value={Download_State.Selected_DataFile}
+                                placeholder={Download_State.Datafile_Options[0]}
                             />
                         </div>
                     </div>
@@ -350,7 +564,6 @@ function Dashboard(){
 
     return (
         <div className="Dashboard_Container">
-            <div className="Tleft_Shadow"></div>
             <div className="Dashboard_Shadow"></div>
             <div className="TabsContainer">
                 <button 
@@ -373,7 +586,7 @@ function Dashboard(){
                 style={{
                     left:"20%"
                 }}
-                >Data Download</button>
+                >Data</button>
                 <button 
                 className="Tabs"
                 onClick={()=>{
@@ -383,7 +596,7 @@ function Dashboard(){
                 style={{
                     left:"30%"
                 }}
-                >Experimental Quantum Algorithms</button>
+                >Quantum</button>
             </div>
             <div className="Dashboard">
                 {RenderDashboard()}

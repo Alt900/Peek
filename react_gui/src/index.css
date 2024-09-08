@@ -1,861 +1,2056 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: black;
+@media (min-height: 500px) and (max-height: 900px) {
+  .Endo{
+    position: absolute;
+    right: -50%;
+    top: -10%;
+    width: 50%;
+    height: 10%;
+  }
+
+  .Endo_Label{
+    position: absolute;
+    left: 0;
+    top: -8%;
+    width: 50%;
+    height: 13%;
+    color: gray;
+    border: 2px;
+    border-color: gray;
+    border-style: solid;
+    border-width: 100%;
+  }
+
+  .Exo{
+    position: absolute;
+    right: -50%;
+    top: 12%;
+    width: 50%;
+    height: 10%;
+  }
+
+  .Exo_Label{
+    position: absolute;
+    left: 0;
+    top: 6%;
+    width: 50%;
+    height: 11%;
+    color: gray;
+    border: 2px;
+    border-color: gray;
+    border-style: solid;
+    border-width: 100%;
+  }
+
+  .Selected_LR{
+    position: absolute;
+    right: -50%;
+    top: 5%;
+    width: 50%;
+    height: 10%;
+  }
+
+  .Selected_LR_Label{
+    position: absolute;
+    left: 0;
+    top: 18%;
+    width: 50%;
+    height: 10%;
+    color: gray;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+    border-width: 100%;
+  }
+
+  .Fit_Model{
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 40%;
+    height: 10%;
+    color: gray;
+    background-color: transparent;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .Model_Predict{
+    position: absolute;
+    right:0;
+    top: 50%;
+    width: 40%;
+    height: 10%;
+    color: gray;
+    background-color: transparent;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .Normalization_Method{
+    position: absolute;
+    top: 0;
+    right: -85%;
+    width: 15%;
+    height: 15%;
+  }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: black;
+  }
+
+  code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+      monospace;
+  }
+
+  .DashboardContainer{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 99%;
+    height: 100%;
+    border: 5px ;
+    border-style: solid;
+    border-color: rgb(105, 0, 105);
+  }
+
+  .Dashboard_Shadow{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 80%;
+    box-shadow: 0px 0px 100px rgb(105, 0, 105);
+    background-color: transparent;
+  }
+
+  .Tleft_Shadow{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 19.5%;
+    height: 19.5%;
+    background-color: transparent;
+    box-shadow: 0px 0px 100px rgb(105, 0, 105);
+  }
+
+  .TabsContainer{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 99%;
+    height: 18%;
+    border: 5px ;
+    border-style: solid;
+    border-color: rgb(105, 0, 105);
+    box-shadow: 0px 0px 100px rgb(105, 0, 105);
+  }
+
+  .Dashboard{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 99%;
+    height: 82%;
+  }
+
+  .ML_Operations{
+    position: absolute;
+    right: 0;
+    bottom: .5%;
+    height: 97%;
+    width: 40%;
+    border: 3px;
+    border-style: solid;
+    border-color: gray;
+    background-color: black;
+  }
+
+  .MLOpButtons{
+    position: absolute;
+    height: 10%;
+    width: 15%;
+    color: gray;
+    border: 2px;
+    border-color: gray;
+    border-style: solid;
+    background-color: transparent;
+  }
+
+  .LockCover{
+    position: absolute;
+    background-color: linear-gradient(rgba(134, 0, 0, 0.3), rgba(255, 0, 0, 0.3));
+    top: 0;
+    right: 0;
+    width: 45;
+    height: 80.5%;
+  }
+
+  .ML_Parameters{
+    position: absolute;
+    bottom: .5%;
+    left: -.5%;
+    width: 60%;
+    height: 40%;
+    background-color: black;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .ParameterContainer{
+    position: absolute;
+    justify-content: center;
+    width: 25%;
+    height: 10%;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .ML_ParameterLabel{
+    position: absolute;
+    color: gray;
+    height: 10%;
+    left: 0;
+    bottom: -15%;
+  }
+
+  .ML_Input{
+    position: absolute;
+    color: gray;
+    width: 40%;
+    height: 100%;
+    border: 0px;
+    top: 0;
+    right: 0;
+  }
+
+
+  .Tabs{
+    position: absolute;
+    bottom: 0;
+    width: 10%;
+    height: 30%;
+    border: 3px ;
+    border-style: solid;
+    border-color: blueviolet;
+    color: blueviolet;
+    background-color: black;
+  }
+
+  .ToolBarContainer{
+    position: absolute;
+    top: 19%;
+    left: -.3%;
+    width: 19.5%;
+    height: 80%;
+    border: 5px ;
+    border-style: solid;
+    border-color: rgb(105, 0, 105);
+    box-shadow: 0px 0px 100px rgb(105, 0, 105);
+  }
+
+  .QASM_editor{
+    position: absolute;
+    right: 0;
+    top: 3%;
+    width: 30%;
+    height: 98%;
+    border: 2px ;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .QASM{
+    position: absolute;
+    top: 5%;
+    width: 100%;
+    height: 50%;
+    border: 3px;
+    border-style: solid;
+    background-color: transparent;
+    color: gray;
+  }
+
+  .QASM_Result{
+    position: absolute;
+    top: 55.5%;
+    width: 100%;
+    height: 43%;
+    border: 3px;
+    border-style: solid;
+    background-color: transparent;
+    color: gray;
+  }
+
+  .QASM_Title{
+    position: absolute;
+    top:-3%;
+    left: 0;
+    width: 100%;
+    height: 3%;
+    color: gray;
+  }
+
+  .Run_QASM{
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 50%;
+    height: 5%;
+    background-color: transparent;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+    color: gray;
+  }
+
+  .Grovers_Algorithm{
+    position: absolute;
+    left: -50%;
+    top: 0;
+    width: 40%;
+    height: 10%;
+    background-color: transparent;
+    color: blueviolet;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+    z-index: 5;
+  }
+
+  .Circuit_Image{
+    position: absolute;
+    width: 100%;
+    height: 90%;
+    top: 0;
+    left: 0;
+  }
+
+  .Circuit_Display{
+    position: absolute;
+    left: .5%;
+    top: 3%;
+    width: 69%;
+    height: 98%;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .Download_Dash{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    left: 0;
+  }
+
+  .Calendar_Nav{
+    position: absolute;
+    top: 53%;
+    left: 80%;
+    width: 20%;
+    height: 10%;
+  }
+
+  .DownloadFrom{
+    position: absolute;
+    bottom: 10%;
+    right: 0;
+    width: 50%;
+    height: 30%;
+  }
+
+  .DownloadTo{
+    position: absolute;
+    bottom: 10%;
+    right: 0;
+    width: 50%;
+    height: 30%;
+  }
+
+  .TickerInput{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 50%;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .Temp_Ticker{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 60%;
+    height: 10%;
+    color: gray;
+    background-color: transparent;
+    border: 0px;
+  }
+
+  .AppendTicker{
+    position: absolute;
+    right: -2%;
+    top: -1%;
+    height: 12%;
+    width: 40%;
+    border: 2px;
+    border-color: gray;
+    border-style: solid;
+    background-color: white;
+    color: gray;
+  }
+
+  .CurrentTickers{
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 87%;
+    background-color: transparent;
+    color: gray;
+  }
+
+  .DownloadTickers{
+    position: absolute;
+    width: 50%;
+    height: 5%;
+    left: 0;
+    top: 18%;
+    background-color: transparent;
+    color: gray;
+  }
+
+  .Download_Options{
+    position: absolute;
+    overflow: hidden;
+    right: 0;
+    top: 2%;
+    width: 30%;
+    height: 100%;
+    background-color: transparent;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .keylabel{
+    position: absolute;
+    top: -2%;
+    left: 0;
+    width: 20%;
+    height: 5%;
+    color: gray;
+  }
+
+  .key{
+    position: absolute;
+    left: 0;
+    top: 5%;
+    width: 48%;
+    height: 3%;
+    color: gray;
+    background-color: transparent;
+  }
+
+  .secretlabel{
+    position: absolute;
+    left: 0;
+    top: 6%;
+    color: gray;
+    width: 50%;
+    height: 2%;
+  }
+
+  .secret{
+    position: absolute;
+    left: 0;
+    top: 13%;
+    height: 3%;
+    width: 48%;
+    color: gray;
+    background-color: transparent;
+  }
+
+  .DataDisplay{
+    position: absolute;
+    top: 2%;
+    left: -.5%;
+    width: 70%;
+    height: 100%;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .Stats_Operations{
+    position: absolute;
+    right: 0;
+    top: 2%;
+    width: 50%;
+    height: 100%;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .Linear_Regression{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 50%;
+    height: 50%;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+  /*
+
+
+
+  react-dropdown/style.css
+
+
+
+  */
+
+  .Dropdown-root {
+
+    position: relative;
+
+  }
+
+
+  .Dropdown-control {
+
+    position: relative;
+
+    overflow: hidden;
+
+    background-color: black;
+
+    border: 1px solid purple;
+
+    border-radius: 2px;
+
+    box-sizing: border-box;
+
+    color: gray;
+
+    cursor: default;
+
+    outline: none;
+
+    padding: 8px 52px 8px 10px;
+
+    transition: all 200ms ease;
+
+  }
+
+
+  .Dropdown-control:hover {
+
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+
+  }
+
+
+  .Dropdown-arrow {
+
+    border-color: #999 transparent transparent;
+
+    border-style: solid;
+
+    border-width: 5px 5px 0;
+
+    content: ' ';
+
+    display: block;
+
+    height: 0;
+
+    margin-top: -ceil(2.5);
+
+    position: absolute;
+
+    right: 10px;
+
+    top: 14px;
+
+    width: 0
+
+  }
+
+
+  .is-open .Dropdown-arrow {
+
+    border-color: transparent transparent #999;
+
+    border-width: 0 5px 5px;
+
+  }
+
+
+  .Dropdown-menu {
+
+    background-color: black;
+
+    border: 1px solid purple;
+
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+
+    box-sizing: border-box;
+
+    margin-top: -1px;
+
+    max-height: 200px;
+
+    overflow-y: hidden;
+
+    position: absolute;
+
+    top: 100%;
+
+    width: 100%;
+
+    z-index: 1000;
+
+    -webkit-overflow-scrolling: touch;
+
+  }
+
+
+  .Dropdown-menu .Dropdown-group > .Dropdown-title{
+
+    padding: 8px 10px;
+
+    color: rgba(51, 51, 51, 1);
+
+    font-weight: bold;
+
+    text-transform: capitalize;
+
+  }
+
+
+  .Dropdown-option {
+
+    box-sizing: border-box;
+
+    color: rgba(51, 51, 51, 0.8);
+
+    cursor: pointer;
+
+    display: block;
+
+    padding: 8px 10px;
+
+  }
+
+
+  .Dropdown-option:last-child {
+
+    border-bottom-right-radius: 2px;
+
+    border-bottom-left-radius: 2px;
+
+  }
+
+
+  .Dropdown-option:hover {
+
+    background-color: black;
+
+    color: purple;
+
+  }
+
+
+  .Dropdown-option.is-selected {
+
+    background-color: black;
+
+    color: purple;
+
+  }
+
+
+  .Dropdown-noresults {
+
+    box-sizing: border-box;
+
+    color: #ccc;
+
+    cursor: default;
+
+    display: block;
+
+    padding: 8px 10px;
+
+  }
+
+
+  /* react calendar src css */
+
+
+  .react-calendar {
+
+    width: 350px;
+
+    max-width: 100%;
+
+    background: black;
+
+    border: 1px solid purple;
+
+    box-shadow: 0px 0px 7px purple;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    line-height: 1.125em;
+
+    color: purple;
+
+  }
+
+
+  .react-calendar--doubleView {
+
+    width: 700px;
+
+  }
+
+
+  .react-calendar--doubleView .react-calendar__viewContainer {
+
+    display: flex;
+
+    margin: -0.5em;
+
+  }
+
+
+  .react-calendar--doubleView .react-calendar__viewContainer > * {
+
+    width: 50%;
+
+    margin: 0.5em;
+
+  }
+
+
+  .react-calendar,
+
+  .react-calendar *,
+
+  .react-calendar *:before,
+
+  .react-calendar *:after {
+
+    -moz-box-sizing: border-box;
+
+    -webkit-box-sizing: border-box;
+
+    box-sizing: border-box;
+
+  }
+
+
+  .react-calendar button {
+
+    margin: 0;
+
+    border: 0;
+
+    outline: none;
+
+    background-color: black;
+
+    color: purple;
+
+  }
+
+
+  .react-calendar button:enabled:hover {
+
+    cursor: pointer;
+
+  }
+
+
+  .react-calendar__navigation {
+
+    display: flex;
+
+    height: 44px;
+
+    margin-bottom: 1em;
+
+  }
+
+
+  .react-calendar__navigation button {
+
+    min-width: 44px;
+
+    background: none;
+
+  }
+
+
+  .react-calendar__navigation button:disabled {
+
+    background-color: black;
+
+    color: purple;
+
+  }
+
+
+  .react-calendar__navigation button:enabled:hover,
+
+  .react-calendar__navigation button:enabled:focus {
+
+    background-color: black;
+    
+    color: purple;
+
+  }
+
+
+  .react-calendar__month-view__weekdays {
+
+    text-align: center;
+
+    text-transform: uppercase;
+
+    font: inherit;
+
+    font-size: 0.75em;
+
+    font-weight: bold;
+
+    color: purple;
+
+  }
+
+
+  .react-calendar__month-view__weekdays__weekday {
+
+    padding: 0.5em;
+
+    color: purple;
+
+  }
+
+
+  .react-calendar__month-view__weekNumbers .react-calendar__tile {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font: inherit;
+
+    font-size: 0.75em;
+
+    font-weight: bold;
+
+  }
+
+
+  .react-calendar__month-view__days__day--weekend {
+
+    color: #d10000;
+
+  }
+
+
+  .react-calendar__month-view__days__day--neighboringMonth,
+
+  .react-calendar__decade-view__years__year--neighboringDecade,
+
+  .react-calendar__century-view__decades__decade--neighboringCentury {
+
+    color: purple;
+
+  }
+
+
+  .react-calendar__year-view .react-calendar__tile,
+
+  .react-calendar__decade-view .react-calendar__tile,
+
+  .react-calendar__century-view .react-calendar__tile {
+
+    padding: 2em 0.5em;
+
+  }
+
+
+  .react-calendar__tile {
+
+    max-width: 100%;
+
+    padding: 10px 6.6667px;
+
+    background: none;
+
+    text-align: center;
+
+    line-height: 16px;
+
+    font: inherit;
+
+    font-size: 0.833em;
+
+  }
+
+
+  .react-calendar__tile:disabled {
+
+    background-color: #f0f0f0;
+
+    color: #ababab;
+
+  }
+
+
+  .react-calendar__month-view__days__day--neighboringMonth:disabled,
+
+  .react-calendar__decade-view__years__year--neighboringDecade:disabled,
+
+  .react-calendar__century-view__decades__decade--neighboringCentury:disabled {
+
+    color: purple;
+    background-color: black;
+
+  }
+
+
+  .react-calendar__tile:enabled:hover,
+
+  .react-calendar__tile:enabled:focus {
+
+    background-color: purple;
+    color: black;
+
+  }
+
+
+  .react-calendar__tile--now {
+
+    background: purple;
+    box-shadow: 0px 0px 7px black;
+
+  }
+
+
+  .react-calendar__tile--now:enabled:hover,
+
+  .react-calendar__tile--now:enabled:focus {
+
+    background: purple;
+    box-shadow: 0px 0px 7px black;
+
+  }
+
+
+  .react-calendar__tile--hasActive {
+
+    background: purple;
+
+  }
+
+
+  .react-calendar__tile--hasActive:enabled:hover,
+
+  .react-calendar__tile--hasActive:enabled:focus {
+
+    background: purple;
+
+  }
+
+
+  .react-calendar__tile--active {
+
+    background: purple;
+
+    color: black;
+
+    box-shadow: 0px 0px 7px purple;
+
+  }
+
+
+  .react-calendar__tile--active:enabled:hover,
+
+  .react-calendar__tile--active:enabled:focus {
+
+    background: purple;
+
+    color: black;
+
+    box-shadow: 0px 0px 7px purple;
+
+  }
+
+  .react-calendar__tile--active:not(:focus) {
+
+    background: purple;
+
+    color: black;
+
+    box-shadow: 0px 0px 7px purple;
+
+  }
+
+
+  .react-calendar--selectRange .react-calendar__tile--hover {
+
+    background-color: purple;
+
+    color: black; 
+
+  }
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-.DashboardContainer{
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 80%;
-  height: 100%;
-  border: 5px ;
-  border-style: solid;
-  border-color: rgb(105, 0, 105);
-}
-
-.Dashboard_Shadow{
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 80.5%;
-  height: 80.5%;
-  box-shadow: 0px 0px 100px rgb(105, 0, 105);
-  background-color: transparent;
-}
-
-.Tleft_Shadow{
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 19.5%;
-  height: 19.5%;
-  background-color: transparent;
-  box-shadow: 0px 0px 100px rgb(105, 0, 105);
-}
-
-.TabsContainer{
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 80%;
-  height: 18%;
-  border: 5px ;
-  border-style: solid;
-  border-color: rgb(105, 0, 105);
-  box-shadow: 0px 0px 100px rgb(105, 0, 105);
-}
-
-.Dashboard{
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 80%;
-  height: 82%;
-}
-
-.ML_Operations{
-  position: absolute;
-  right: 0;
-  bottom: .5%;
-  height: 97%;
-  width: 40%;
-  border: 3px;
-  border-style: solid;
-  border-color: gray;
-  background-color: black;
-}
-
-.MLOpButtons{
-  position: absolute;
-  height: 10%;
-  width: 15%;
-  color: gray;
-  border: 2px;
-  border-color: gray;
-  border-style: solid;
-  background-color: transparent;
-}
-
-.LockCover{
-  position: absolute;
-  background-color: linear-gradient(rgba(134, 0, 0, 0.3), rgba(255, 0, 0, 0.3));
-  top: 0;
-  right: 0;
-  width: 45;
-  height: 80.5%;
-}
-
-.ML_Parameters{
-  position: absolute;
-  bottom: .5%;
-  left: -.5%;
-  width: 60%;
-  height: 40%;
-  background-color: black;
-  border: 2px;
-  border-style: solid;
-  border-color: gray;
-}
-
-.ParameterContainer{
-  position: absolute;
-  width: 25%;
-  height: 9.5%;
-  border: 2px;
-  border-style: solid;
-  border-color: gray;
-}
-
-.ML_ParameterLabel{
-  position: absolute;
-  color: gray;
-  width: 80%;
-  height: 10%;
-  left: 0;
-  top: -50%;
-}
-
-.ML_Input{
-  position: absolute;
-  color: gray;
-  width: 40%;
-  height: 100%;
-  border: 0px;
-  top: 0;
-  right: 0;
-}
-
-
-.Tabs{
-  position: absolute;
-  bottom: 0;
-  width: 10%;
-  height: 30%;
-  border: 3px ;
-  border-style: solid;
-  border-color: blueviolet;
-  color: blueviolet;
-  background-color: black;
-}
-
-.ToolBarContainer{
-  position: absolute;
-  top: 19%;
-  left: -.3%;
-  width: 19.5%;
-  height: 80%;
-  border: 5px ;
-  border-style: solid;
-  border-color: rgb(105, 0, 105);
-  box-shadow: 0px 0px 100px rgb(105, 0, 105);
-}
-
-.QASM_editor{
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 30%;
-  height: 98%;
-  border: 3px ;
-  border-style: solid;
-  border-color: rgb(105, 0, 105);
-}
-
-.QASM{
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 80%;
-  border: 3px;
-  border-style: solid;
-  background-color: transparent;
-  color: gray;
-}
-
-.QASM_Title{
-  position: absolute;
-  top: 12%;
-  left: 0;
-  width: 40%;
-  height: 3%;
-  color: gray;
-  border: 3px;
-  border-style: solid;
-  border-color: gray;
-}
-
-.Download_Dash{
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  bottom: 0;
-  left: 0;
-}
-
-.Calendar_Nav{
-  position: absolute;
-  top: 55%;
-  left: 77.25%;
-  width: 20%;
-  height: 10%;
-}
-
-.DownloadFrom{
-  position: absolute;
-  bottom: 10%;
-  right: 0;
-  width: 50%;
-  height: 30%;
-}
-
-.DownloadTo{
-  position: absolute;
-  bottom: 10%;
-  right: 0;
-  width: 50%;
-  height: 30%;
-}
-
-.TickerInput{
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 50%;
-  height: 50%;
-  border: 2px;
-  border-style: solid;
-  border-color: gray;
-}
-
-.Temp_Ticker{
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 60%;
-  height: 10%;
-  color: gray;
-  background-color: transparent;
-  border: 2px;
-  border-style: solid;
-  border-color: gray;
-}
-
-.AppendTicker{
-  position: absolute;
-  right: -2%;
-  top: -1%;
-  height: 12%;
-  width: 40%;
-  border: 1px;
-  border-color: black;
-  border-style: solid;
-  background-color: white;
-  color: gray;
-}
-
-.CurrentTickers{
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 87%;
-  background-color: transparent;
-  color: gray;
-}
-
-.DownloadTickers{
-  position: absolute;
-  width: 50%;
-  height: 5%;
-  left: 0;
-  top: 18%;
-  background-color: transparent;
-  color: gray;
-}
-
-.Download_Options{
-  position: absolute;
-  overflow: hidden;
-  right: 0;
-  top: 2%;
-  width: 30%;
-  height: 100%;
-  background-color: transparent;
-  border: 2px;
-  border-style: solid;
-  border-color: gray;
-}
-
-.keylabel{
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 20%;
-  height: 5%;
-  color: gray;
-}
-
-.key{
-  position: absolute;
-  left: 0;
-  top: 5%;
-  width: 48%;
-  height: 3%;
-  color: gray;
-  background-color: transparent;
-}
-
-.secretlabel{
-  position: absolute;
-  left: 0;
-  top: 8%;
-  color: gray;
-  width: 50%;
-  height: 5%;
-}
-
-.secret{
-  position: absolute;
-  left: 0;
-  top: 13%;
-  height: 3%;
-  width: 48%;
-  color: gray;
-  background-color: transparent;
-}
-
-.DataDisplay{
-  position: absolute;
-  top: 2%;
-  left: -.5%;
-  width: 70%;
-  height: 100%;
-  border: 2px;
-  border-style: solid;
-  border-color: gray;
-}
-
-
-
-/*
-
-
-
-react-dropdown/style.css
-
-
-
-*/
-
-.Dropdown-root {
-
-  position: relative;
-
-}
-
-
-.Dropdown-control {
-
-  position: relative;
-
-  overflow: hidden;
-
-  background-color: black;
-
-  border: 1px solid purple;
-
-  border-radius: 2px;
-
-  box-sizing: border-box;
-
-  color: #333;
-
-  cursor: default;
-
-  outline: none;
-
-  padding: 8px 52px 8px 10px;
-
-  transition: all 200ms ease;
-
-}
-
-
-.Dropdown-control:hover {
-
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
-
-}
-
-
-.Dropdown-arrow {
-
-  border-color: #999 transparent transparent;
-
-  border-style: solid;
-
-  border-width: 5px 5px 0;
-
-  content: ' ';
-
-  display: block;
-
-  height: 0;
-
-  margin-top: -ceil(2.5);
-
-  position: absolute;
-
-  right: 10px;
-
-  top: 14px;
-
-  width: 0
-
-}
-
-
-.is-open .Dropdown-arrow {
-
-  border-color: transparent transparent #999;
-
-  border-width: 0 5px 5px;
-
-}
-
-
-.Dropdown-menu {
-
-  background-color: black;
-
-  border: 1px solid purple;
-
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
-
-  box-sizing: border-box;
-
-  margin-top: -1px;
-
-  max-height: 200px;
-
-  overflow-y: hidden;
-
-  position: absolute;
-
-  top: 100%;
-
-  width: 100%;
-
-  z-index: 1000;
-
-  -webkit-overflow-scrolling: touch;
-
-}
-
-
-.Dropdown-menu .Dropdown-group > .Dropdown-title{
-
-  padding: 8px 10px;
-
-  color: rgba(51, 51, 51, 1);
-
-  font-weight: bold;
-
-  text-transform: capitalize;
-
-}
-
-
-.Dropdown-option {
-
-  box-sizing: border-box;
-
-  color: rgba(51, 51, 51, 0.8);
-
-  cursor: pointer;
-
-  display: block;
-
-  padding: 8px 10px;
-
-}
-
-
-.Dropdown-option:last-child {
-
-  border-bottom-right-radius: 2px;
-
-   border-bottom-left-radius: 2px;
-
-}
-
-
-.Dropdown-option:hover {
-
-  background-color: black;
-
-  color: purple;
-
-}
-
-
-.Dropdown-option.is-selected {
-
-  background-color: black;
-
-  color: purple;
-
-}
-
-
-.Dropdown-noresults {
-
-  box-sizing: border-box;
-
-  color: #ccc;
-
-  cursor: default;
-
-  display: block;
-
-  padding: 8px 10px;
-
-}
-
-
-/* react calendar src css */
-
-
-.react-calendar {
-
-  width: 350px;
-
-  max-width: 100%;
-
-  background: black;
-
-  border: 1px solid purple;
-
-  box-shadow: 0px 0px 7px purple;
-
-  font-family: Arial, Helvetica, sans-serif;
-
-  line-height: 1.125em;
-
-  color: purple;
-
-}
-
-
-.react-calendar--doubleView {
-
-  width: 700px;
-
-}
-
-
-.react-calendar--doubleView .react-calendar__viewContainer {
-
-  display: flex;
-
-  margin: -0.5em;
-
-}
-
-
-.react-calendar--doubleView .react-calendar__viewContainer > * {
-
-  width: 50%;
-
-  margin: 0.5em;
-
-}
-
-
-.react-calendar,
-
-.react-calendar *,
-
-.react-calendar *:before,
-
-.react-calendar *:after {
-
-  -moz-box-sizing: border-box;
-
-  -webkit-box-sizing: border-box;
-
-  box-sizing: border-box;
-
-}
-
-
-.react-calendar button {
-
-  margin: 0;
-
-  border: 0;
-
-  outline: none;
-
-  background-color: black;
-
-  color: purple;
-
-}
-
-
-.react-calendar button:enabled:hover {
-
-  cursor: pointer;
-
-}
-
-
-.react-calendar__navigation {
-
-  display: flex;
-
-  height: 44px;
-
-  margin-bottom: 1em;
-
-}
-
-
-.react-calendar__navigation button {
-
-  min-width: 44px;
-
-  background: none;
-
-}
-
-
-.react-calendar__navigation button:disabled {
-
-  background-color: black;
-
-  color: purple;
-
-}
-
-
-.react-calendar__navigation button:enabled:hover,
-
-.react-calendar__navigation button:enabled:focus {
-
-  background-color: black;
+@media (max-height: 1500px) and (min-height: 1000px) {
+
+  .Endo{
+    position: absolute;
+    right: -50%;
+    top: -10%;
+    width: 50%;
+    height: 10%;
+  }
+
+  .Endo_Label{
+    position: absolute;
+    left: 0;
+    top: -4.5%;
+    width: 50%;
+    height: 7%;
+    color: gray;
+    border: 2px;
+    border-color: gray;
+    border-style: solid;
+    border-width: 100%;
+  }
+
+  .Exo{
+    position: absolute;
+    right: -50%;
+    top: 7%;
+    width: 50%;
+    height: 10%;
+  }
+
+  .Exo_Label{
+    position: absolute;
+    left: 0;
+    top: 3%;
+    width: 50%;
+    height: 7%;
+    color: gray;
+    border: 2px;
+    border-color: gray;
+    border-style: solid;
+    border-width: 100%;
+  }
+
+  .Selected_LR{
+    position: absolute;
+    right: -50%;
+    top: -6%;
+    width: 50%;
+    height: 10%;
+  }
+
+  .Selected_LR_Label{
+    position: absolute;
+    left: 0;
+    top: 10%;
+    width: 50%;
+    height: 6%;
+    color: gray;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+    border-width: 100%;
+  }
+
+  .Fit_Model{
+    position: absolute;
+    left: 0;
+    top: 25%;
+    width: 40%;
+    height: 10%;
+    color: gray;
+    background-color: transparent;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .Model_Predict{
+    position: absolute;
+    right:0;
+    top: 25%;
+    width: 40%;
+    height: 10%;
+    color: gray;
+    background-color: transparent;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: black;
+  }
+
+  code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+      monospace;
+  }
+
+  .DashboardContainer{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 99%;
+    height: 100%;
+    border: 5px ;
+    border-style: solid;
+    border-color: rgb(105, 0, 105);
+  }
+
+  .Dashboard_Shadow{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 80%;
+    box-shadow: 0px 0px 100px rgb(105, 0, 105);
+    background-color: transparent;
+  }
+
+  .Tleft_Shadow{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 19.5%;
+    height: 19.5%;
+    background-color: transparent;
+    box-shadow: 0px 0px 100px rgb(105, 0, 105);
+  }
+
+  .TabsContainer{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 99%;
+    height: 18%;
+    border: 5px ;
+    border-style: solid;
+    border-color: rgb(105, 0, 105);
+    box-shadow: 0px 0px 100px rgb(105, 0, 105);
+  }
+
+  .Dashboard{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 99%;
+    height: 82%;
+  }
+
+  .ML_Operations{
+    position: absolute;
+    right: 0;
+    bottom: .5%;
+    height: 97%;
+    width: 40%;
+    border: 3px;
+    border-style: solid;
+    border-color: gray;
+    background-color: black;
+  }
+
+  .MLOpButtons{
+    position: absolute;
+    height: 10%;
+    width: 15%;
+    color: gray;
+    border: 2px;
+    border-color: gray;
+    border-style: solid;
+    background-color: transparent;
+  }
+
+  .LockCover{
+    position: absolute;
+    background-color: linear-gradient(rgba(134, 0, 0, 0.3), rgba(255, 0, 0, 0.3));
+    top: 0;
+    right: 0;
+    width: 45;
+    height: 80.5%;
+  }
   
-  color: purple;
+  .ML_Parameters{
+    position: absolute;
+    bottom: .5%;
+    left: -.5%;
+    width: 60%;
+    height: 40%;
+    background-color: black;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .ParameterContainer{
+    position: absolute;
+    justify-content: center;
+    width: 25%;
+    height: 10%;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .ML_ParameterLabel{
+    position: absolute;
+    color: gray;
+    height: 10%;
+    left: 0;
+    bottom: 0;
+  }
+
+  .ML_Input{
+    position: absolute;
+    color: gray;
+    width: 40%;
+    height: 100%;
+    border: 0px;
+    top: 0;
+    right: 0;
+  }
+
+
+  .Tabs{
+    position: absolute;
+    bottom: 0;
+    width: 10%;
+    height: 30%;
+    border: 3px ;
+    border-style: solid;
+    border-color: blueviolet;
+    color: blueviolet;
+    background-color: black;
+  }
+
+  .ToolBarContainer{
+    position: absolute;
+    top: 19%;
+    left: -.3%;
+    width: 19.5%;
+    height: 80%;
+    border: 5px ;
+    border-style: solid;
+    border-color: rgb(105, 0, 105);
+    box-shadow: 0px 0px 100px rgb(105, 0, 105);
+  }
+
+  .QASM_editor{
+    position: absolute;
+    right: 0;
+    top: 3%;
+    width: 30%;
+    height: 98%;
+    border: 2px ;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .QASM{
+    position: absolute;
+    top: 5%;
+    width: 100%;
+    height: 50%;
+    border: 3px;
+    border-style: solid;
+    background-color: transparent;
+    color: gray;
+  }
+
+  .QASM_Result{
+    position: absolute;
+    top: 55.5%;
+    width: 100%;
+    height: 43%;
+    border: 3px;
+    border-style: solid;
+    background-color: transparent;
+    color: gray;
+  }
+
+  .QASM_Title{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3%;
+    color: gray;
+  }
+
+  .Run_QASM{
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 50%;
+    height: 5%;
+    background-color: transparent;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+    color: gray;
+  }
+
+  .Grovers_Algorithm{
+    position: absolute;
+    left: -50%;
+    top: 0;
+    width: 40%;
+    height: 10%;
+    background-color: transparent;
+    color: blueviolet;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+    z-index: 5;
+  }
+
+  .Circuit_Image{
+    position: absolute;
+    width: 100%;
+    height: 90%;
+    top: 0;
+    left: 0;
+  }
+
+  .Circuit_Display{
+    position: absolute;
+    left: .5%;
+    top: 3%;
+    width: 69%;
+    height: 98%;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .Download_Dash{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    left: 0;
+  }
+
+  .Calendar_Nav{
+    position: absolute;
+    top: 53%;
+    left: 80%;
+    width: 20%;
+    height: 10%;
+  }
+
+  .DownloadFrom{
+    position: absolute;
+    bottom: 10%;
+    right: 0;
+    width: 50%;
+    height: 30%;
+  }
+
+  .DownloadTo{
+    position: absolute;
+    bottom: 10%;
+    right: 0;
+    width: 50%;
+    height: 30%;
+  }
+
+  .TickerInput{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 50%;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .Temp_Ticker{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 60%;
+    height: 10%;
+    color: gray;
+    background-color: transparent;
+    border: 0px;
+  }
+
+  .AppendTicker{
+    position: absolute;
+    right: -2%;
+    top: -1%;
+    height: 12%;
+    width: 40%;
+    border: 2px;
+    border-color: gray;
+    border-style: solid;
+    background-color: white;
+    color: gray;
+  }
+
+  .CurrentTickers{
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 87%;
+    background-color: transparent;
+    color: gray;
+  }
+
+  .DownloadTickers{
+    position: absolute;
+    width: 50%;
+    height: 5%;
+    left: 0;
+    top: 18%;
+    background-color: transparent;
+    color: gray;
+  }
+
+  .Download_Options{
+    position: absolute;
+    overflow: hidden;
+    right: 0;
+    top: 2%;
+    width: 30%;
+    height: 100%;
+    background-color: transparent;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .keylabel{
+    position: absolute;
+    top: 1%;
+    left: 0;
+    width: 20%;
+    height: 5%;
+    color: gray;
+  }
+
+  .key{
+    position: absolute;
+    left: 0;
+    top: 5%;
+    width: 48%;
+    height: 3%;
+    color: gray;
+    background-color: transparent;
+  }
+
+  .secretlabel{
+    position: absolute;
+    left: 0;
+    top: 9%;
+    color: gray;
+    width: 50%;
+    height: 2%;
+  }
+
+  .secret{
+    position: absolute;
+    left: 0;
+    top: 13%;
+    height: 3%;
+    width: 48%;
+    color: gray;
+    background-color: transparent;
+  }
+
+  .DataDisplay{
+    position: absolute;
+    top: 2%;
+    left: -.5%;
+    width: 70%;
+    height: 100%;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .Stats_Operations{
+    position: absolute;
+    right: 0;
+    top: 2%;
+    width: 50%;
+    height: 100%;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+
+  .Linear_Regression{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 50%;
+    height: 50%;
+    border: 2px;
+    border-style: solid;
+    border-color: gray;
+  }
+  /*
+
+
+
+  react-dropdown/style.css
+
+
+
+  */
+
+  .Dropdown-root {
+
+    position: relative;
+
+  }
+
+
+  .Dropdown-control {
+
+    position: relative;
 
-}
+    overflow: hidden;
 
+    background-color: black;
 
-.react-calendar__month-view__weekdays {
+    border: 1px solid purple;
 
-  text-align: center;
+    border-radius: 2px;
 
-  text-transform: uppercase;
+    box-sizing: border-box;
 
-  font: inherit;
+    color: gray;
 
-  font-size: 0.75em;
+    cursor: default;
 
-  font-weight: bold;
+    outline: none;
 
-  color: purple;
+    padding: 8px 52px 8px 10px;
 
-}
+    transition: all 200ms ease;
 
+  }
 
-.react-calendar__month-view__weekdays__weekday {
 
-  padding: 0.5em;
+  .Dropdown-control:hover {
 
-  color: purple;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
 
-}
+  }
 
 
-.react-calendar__month-view__weekNumbers .react-calendar__tile {
+  .Dropdown-arrow {
 
-  display: flex;
+    border-color: #999 transparent transparent;
 
-  align-items: center;
+    border-style: solid;
 
-  justify-content: center;
+    border-width: 5px 5px 0;
 
-  font: inherit;
+    content: ' ';
 
-  font-size: 0.75em;
+    display: block;
 
-  font-weight: bold;
+    height: 0;
 
-}
+    margin-top: -ceil(2.5);
 
+    position: absolute;
 
-.react-calendar__month-view__days__day--weekend {
+    right: 10px;
 
-  color: #d10000;
+    top: 14px;
 
-}
+    width: 0
 
+  }
 
-.react-calendar__month-view__days__day--neighboringMonth,
 
-.react-calendar__decade-view__years__year--neighboringDecade,
+  .is-open .Dropdown-arrow {
 
-.react-calendar__century-view__decades__decade--neighboringCentury {
+    border-color: transparent transparent #999;
 
-  color: purple;
+    border-width: 0 5px 5px;
 
-}
+  }
 
 
-.react-calendar__year-view .react-calendar__tile,
+  .Dropdown-menu {
 
-.react-calendar__decade-view .react-calendar__tile,
+    background-color: black;
 
-.react-calendar__century-view .react-calendar__tile {
+    border: 1px solid purple;
 
-  padding: 2em 0.5em;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
 
-}
+    box-sizing: border-box;
 
+    margin-top: -1px;
 
-.react-calendar__tile {
+    max-height: 200px;
 
-  max-width: 100%;
+    overflow-y: hidden;
 
-  padding: 10px 6.6667px;
+    position: absolute;
 
-  background: none;
+    top: 100%;
 
-  text-align: center;
+    width: 100%;
 
-  line-height: 16px;
+    z-index: 1000;
 
-  font: inherit;
+    -webkit-overflow-scrolling: touch;
 
-  font-size: 0.833em;
+  }
 
-}
 
+  .Dropdown-menu .Dropdown-group > .Dropdown-title{
 
-.react-calendar__tile:disabled {
+    padding: 8px 10px;
 
-  background-color: #f0f0f0;
+    color: rgba(51, 51, 51, 1);
 
-  color: #ababab;
+    font-weight: bold;
 
-}
+    text-transform: capitalize;
 
+  }
 
-.react-calendar__month-view__days__day--neighboringMonth:disabled,
 
-.react-calendar__decade-view__years__year--neighboringDecade:disabled,
+  .Dropdown-option {
 
-.react-calendar__century-view__decades__decade--neighboringCentury:disabled {
+    box-sizing: border-box;
 
-  color: purple;
-  background-color: black;
+    color: rgba(51, 51, 51, 0.8);
 
-}
+    cursor: pointer;
 
+    display: block;
 
-.react-calendar__tile:enabled:hover,
+    padding: 8px 10px;
 
-.react-calendar__tile:enabled:focus {
+  }
 
-  background-color: purple;
-  color: black;
 
-}
+  .Dropdown-option:last-child {
 
+    border-bottom-right-radius: 2px;
 
-.react-calendar__tile--now {
+    border-bottom-left-radius: 2px;
 
-  background: purple;
-  box-shadow: 0px 0px 7px black;
+  }
 
-}
 
+  .Dropdown-option:hover {
 
-.react-calendar__tile--now:enabled:hover,
+    background-color: black;
 
-.react-calendar__tile--now:enabled:focus {
+    color: purple;
 
-  background: purple;
-  box-shadow: 0px 0px 7px black;
+  }
 
-}
 
+  .Dropdown-option.is-selected {
 
-.react-calendar__tile--hasActive {
+    background-color: black;
 
-  background: purple;
+    color: purple;
 
-}
+  }
 
 
-.react-calendar__tile--hasActive:enabled:hover,
+  .Dropdown-noresults {
 
-.react-calendar__tile--hasActive:enabled:focus {
+    box-sizing: border-box;
 
-  background: purple;
+    color: #ccc;
 
-}
+    cursor: default;
 
+    display: block;
 
-.react-calendar__tile--active {
+    padding: 8px 10px;
 
-  background: purple;
+  }
 
-  color: black;
 
-  box-shadow: 0px 0px 7px purple;
+  /* react calendar src css */
 
-}
 
+  .react-calendar {
 
-.react-calendar__tile--active:enabled:hover,
+    width: 350px;
 
-.react-calendar__tile--active:enabled:focus {
+    max-width: 100%;
 
-  background: purple;
+    background: black;
 
-  color: black;
+    border: 1px solid purple;
 
-  box-shadow: 0px 0px 7px purple;
+    box-shadow: 0px 0px 7px purple;
 
-}
+    font-family: Arial, Helvetica, sans-serif;
 
-.react-calendar__tile--active:not(:focus) {
+    line-height: 1.125em;
 
-  background: purple;
+    color: purple;
 
-  color: black;
+  }
 
-  box-shadow: 0px 0px 7px purple;
 
-}
+  .react-calendar--doubleView {
 
+    width: 700px;
 
-.react-calendar--selectRange .react-calendar__tile--hover {
+  }
 
-  background-color: purple;
 
-  color: black; 
+  .react-calendar--doubleView .react-calendar__viewContainer {
 
+    display: flex;
+
+    margin: -0.5em;
+
+  }
+
+
+  .react-calendar--doubleView .react-calendar__viewContainer > * {
+
+    width: 50%;
+
+    margin: 0.5em;
+
+  }
+
+
+  .react-calendar,
+
+  .react-calendar *,
+
+  .react-calendar *:before,
+
+  .react-calendar *:after {
+
+    -moz-box-sizing: border-box;
+
+    -webkit-box-sizing: border-box;
+
+    box-sizing: border-box;
+
+  }
+
+
+  .react-calendar button {
+
+    margin: 0;
+
+    border: 0;
+
+    outline: none;
+
+    background-color: black;
+
+    color: purple;
+
+  }
+
+
+  .react-calendar button:enabled:hover {
+
+    cursor: pointer;
+
+  }
+
+
+  .react-calendar__navigation {
+
+    display: flex;
+
+    height: 44px;
+
+    margin-bottom: 1em;
+
+  }
+
+
+  .react-calendar__navigation button {
+
+    min-width: 44px;
+
+    background: none;
+
+  }
+
+
+  .react-calendar__navigation button:disabled {
+
+    background-color: black;
+
+    color: purple;
+
+  }
+
+
+  .react-calendar__navigation button:enabled:hover,
+
+  .react-calendar__navigation button:enabled:focus {
+
+    background-color: black;
+    
+    color: purple;
+
+  }
+
+
+  .react-calendar__month-view__weekdays {
+
+    text-align: center;
+
+    text-transform: uppercase;
+
+    font: inherit;
+
+    font-size: 0.75em;
+
+    font-weight: bold;
+
+    color: purple;
+
+  }
+
+
+  .react-calendar__month-view__weekdays__weekday {
+
+    padding: 0.5em;
+
+    color: purple;
+
+  }
+
+
+  .react-calendar__month-view__weekNumbers .react-calendar__tile {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font: inherit;
+
+    font-size: 0.75em;
+
+    font-weight: bold;
+
+  }
+
+
+  .react-calendar__month-view__days__day--weekend {
+
+    color: #d10000;
+
+  }
+
+
+  .react-calendar__month-view__days__day--neighboringMonth,
+
+  .react-calendar__decade-view__years__year--neighboringDecade,
+
+  .react-calendar__century-view__decades__decade--neighboringCentury {
+
+    color: purple;
+
+  }
+
+
+  .react-calendar__year-view .react-calendar__tile,
+
+  .react-calendar__decade-view .react-calendar__tile,
+
+  .react-calendar__century-view .react-calendar__tile {
+
+    padding: 2em 0.5em;
+
+  }
+
+
+  .react-calendar__tile {
+
+    max-width: 100%;
+
+    padding: 10px 6.6667px;
+
+    background: none;
+
+    text-align: center;
+
+    line-height: 16px;
+
+    font: inherit;
+
+    font-size: 0.833em;
+
+  }
+
+
+  .react-calendar__tile:disabled {
+
+    background-color: #f0f0f0;
+
+    color: #ababab;
+
+  }
+
+
+  .react-calendar__month-view__days__day--neighboringMonth:disabled,
+
+  .react-calendar__decade-view__years__year--neighboringDecade:disabled,
+
+  .react-calendar__century-view__decades__decade--neighboringCentury:disabled {
+
+    color: purple;
+    background-color: black;
+
+  }
+
+
+  .react-calendar__tile:enabled:hover,
+
+  .react-calendar__tile:enabled:focus {
+
+    background-color: purple;
+    color: black;
+
+  }
+
+
+  .react-calendar__tile--now {
+
+    background: purple;
+    box-shadow: 0px 0px 7px black;
+
+  }
+
+
+  .react-calendar__tile--now:enabled:hover,
+
+  .react-calendar__tile--now:enabled:focus {
+
+    background: purple;
+    box-shadow: 0px 0px 7px black;
+
+  }
+
+
+  .react-calendar__tile--hasActive {
+
+    background: purple;
+
+  }
+
+
+  .react-calendar__tile--hasActive:enabled:hover,
+
+  .react-calendar__tile--hasActive:enabled:focus {
+
+    background: purple;
+
+  }
+
+
+  .react-calendar__tile--active {
+
+    background: purple;
+
+    color: black;
+
+    box-shadow: 0px 0px 7px purple;
+
+  }
+
+
+  .react-calendar__tile--active:enabled:hover,
+
+  .react-calendar__tile--active:enabled:focus {
+
+    background: purple;
+
+    color: black;
+
+    box-shadow: 0px 0px 7px purple;
+
+  }
+
+  .react-calendar__tile--active:not(:focus) {
+
+    background: purple;
+
+    color: black;
+
+    box-shadow: 0px 0px 7px purple;
+
+  }
+
+
+  .react-calendar--selectRange .react-calendar__tile--hover {
+
+    background-color: purple;
+
+    color: black; 
+
+  }
 }

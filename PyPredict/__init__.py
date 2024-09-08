@@ -25,18 +25,20 @@ args = {
     "Batch_Size":32,
     "Window_Size":5,
     "Learning_Rate":0.1,
-    "Train-Test-Split":(.7,.3),#add to react
-    #for data-preprocessing in React add a dropdown 
-    #same with normalization linked to C code
-    "Train-Test-Validation-Split":(.6,.3,.1),#add to react Machine Learning
+    "Normalization_Method":"Logarithmic",
+    "Train-Test-Validation-Split":(.6,.3,.1),
+    "Time_Shift":1,#add to react
+    "Label_Size": 1,#add to react
+    #the label size will be determined by how many variables are selected
+    #in a check-box of available variables to window 
     "Targeted_Ticker":"",
     "Targeted_Variable":"",
     "Cell_Count": 10, #add to react Machine Learning
-    "to":[],#fix calendar
-    "from": [],#fix calendar
+    "to":[],
+    "from": [],
     "tickers":[],
-    "alpaca_key":"",#add
-    "alpaca_secret":"",#add
+    "alpaca_key":"",
+    "alpaca_secret":"",
     "Omit_Cache":False,#add
     "OPENQASM_Script":"OPENQASM 2.0;\ninclude 'qelib1.inc';\ncreg q[4];\ncreg c[4];"
 }
