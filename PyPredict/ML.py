@@ -110,41 +110,6 @@ class Feature_Engineering():
     
     def difference(self):
         return self.time_series.diff().fillna(0)
-    
-#normalization is handled by C
-def Normalize(Method,Array=None,Matrix=None):
-    Lib = ctypes.CDLL('./Lib/Normalization.dll')
-    dispatcher = {
-        "Logarithmic":Lib.Logarithmic_Normalization,
-        "Z Score":Lib.Z_Score_Normalization,
-        "Min Max":Lib.Min_Max_Normalization,
-        "Difference": Lib.Difference_Normalization,
-    }
-    Function=dispatcher[Method]
-    if Array!=None and Matrix==None:
-        Lib.Array=CArray
-        Lib.size=len(Array)
-        CArray = Array.ctypes.data_as(
-            ctypes.POINTER(ctypes.c_long)
-        )
-
-    if Matrix!=None and Array==None:
-        row_count=Matrix.shape[0]
-        size=Matrix.shape[1]
-        Lib.size=size
-        Lib.row_count=row_count
-        Lib.FlattenMatrix(
-            Matrix.ctypes.data_as(
-                ctypes.POINTER(
-                    ctypes.POINTER(ctypes.c_long)
-                )
-            )
-        )#automatically sets Array
-
-    Function()#void, sets array
-    return np.ndarray(
-        (Lib.size,),'f',Lib.Array,'C'
-    )
 
 class LSTM_Model(torch.nn.Module):
     def __init__(self,

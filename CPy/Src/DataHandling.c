@@ -1,25 +1,52 @@
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
-long *Array;
+double *Array;
 int size;
-int row_count;
 
-void *FlattenMatrix(long **Matrix){
-    Array = (long*)malloc(row_count*size*sizeof(long));
-    int row = 0;
-    int column = 0;
-    for (int i = 0; i < size*row_count; i++){
-        Array[i]=Matrix[row][column];
-        column++;
-        if(i%size==0){
-            row++;
-            column=0;
+double **Windowed_Matrix;
+double *Windowed_Labels;
+int Col;
+int Row;
+int Windowsize;
+
+void Calc_Matrix_Shape(){
+    Col = Windowsize;
+    Row = size/Windowsize;
+    float intpart;
+    float remainder = modf(Row,&intpart);
+    float padding = 0;
+    if(remainder!=0.0){
+        for (int x = size; x<size+Windowsize; x++){
+            if (size%Windowsize==0){
+                padding=x;
+                break;
+            }
         }
+    }
+    Row = size/(Windowsize+padding);
+}
+
+void Window_Array(){
+    for (int i = 0; i<Row; i++){
+        double* slice = (double*)calloc(Windowsize,sizeof(double));
+        memcpy(Windowed_Matrix[i],slice,Windowsize+i);//#row i = Array elements from ith to ith+windowsize
+        Windowed_Labels[i]=Array[Windowsize+i+1];
     }
 }
 
-//prerequisite functions used by normalization methods
+void *InitArray(double *NewArray){
+    if(Array!=NULL){
+        free(Array);
+    }
+    Array = (double*) calloc(size,sizeof(double));
+    memcpy(Array,NewArray,size);
+}
+
+void *FreeArray(){
+    free(Array);
+}
 
 float Mean(){
     float sum = 0.0;
@@ -67,7 +94,7 @@ float Max(){
 
 //Normalization methods
 
-void* Logarithmic_Normalization(){
+void Logarithmic_Normalization(){
     for (int n=0; n<size; n++){
         *(Array+n)=log(*(Array+n));
     }
@@ -92,6 +119,6 @@ void* Min_Max_Normalization(){
 
 void* Difference_Normalization(){
     for (int n=0; n<size; n++){
-        *(Array+n)=(*(Array+n)-*(Array));
+        *(Array+n)=(*(Array+n)-*(Array+n-1));
     }
 }

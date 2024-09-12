@@ -4,21 +4,6 @@ from statsmodels.tsa.forecasting.theta import ThetaModel
 from statsmodels.tsa.arima.model import ARIMA
 from .API_Interface import data
 from . import np
-
-class Standard_Measurements():
-    def __init__(self,ticker,variable):
-        self.ticker=ticker
-        self.variable=variable
-
-    def Central_Tendacy(self):
-        return [
-            data[self.ticker][self.variable].mean(),
-            data[self.ticker][self.variable].median(),
-            data[self.ticker][self.variable].mode()[0],]
-                
-    def standard_deviation(self):
-        return data[self.ticker][self.variable].std()
-    
 class Diagnostics():
 
     def __init__(self):
@@ -79,19 +64,6 @@ class Technical_Indicators():
         convolution[:window_size] = convolution[window_size]
         return convolution
 
-    def ATR(self):
-        length=len(self.time_series.index)
-        TR=[0]
-
-        for n in range(1,length):
-            TR.append(max([
-                self.time_series["high"][n]-self.time_series["low"][n],
-                abs(self.time_series["high"][n]-self.time_series["close"][n-1]),
-                abs(self.time_series["low"][n]-self.time_series["close"][n-1])
-            ]))
-
-        return self.EWMA(TR,14)
-    
     def product(self,x):
         sub_x, sub_y = self.time_series.index, self.time_series.values
         n=len(sub_x)
@@ -117,5 +89,3 @@ class Technical_Indicators():
             interpolated_set.append(self.product(x))
 
         return interpolated_set
-
-        

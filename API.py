@@ -1,6 +1,7 @@
 
 import os
 import json
+import ctypes
 from flask import Flask,request
 from flask_cors import CORS
 
@@ -17,10 +18,13 @@ CORS(app)
 def SetDownloadArgs():
     PyPredict.args["alpaca_key"]=request.args.get("Alpaca_key",type=str)
     PyPredict.args["alpaca_secret"]=request.args.get("Alpaca_secret",type=str)
-    PyPredict.args["tickers"]=json.loads(request.args.getlist("Tickers")[0])
+    tickers = request.args.get("Tickers")
+    tickers=[x.replace(" ","") for x in tickers.split(',')]
+    print(tickers)
+    print(type(tickers))
+    PyPredict.args["tickers"]=tickers
     PyPredict.args["from"]=json.loads(request.args.getlist("from")[0])
     PyPredict.args["to"]=json.loads(request.args.getlist("to")[0])
-    print(type(PyPredict.args["to"]))
     return{
         "payload": "All download parameters are set",
         "error":None
@@ -65,23 +69,10 @@ def SetMLArgs():
 @app.route("/Train_Univar",methods=['GET'])
 def TrainUniVar():
 
-    if PyPredict.args["Targeted_Ticker"]=="":
-        Normalized = ML.Normalize(
-            PyPredict.args["Normalization_Method"],
-            Matrix=API_Interface.data[
-                PyPredict.args["Targeted_Ticker"]
-            ]
-        )
-
-    else:
-        Normalized = ML.Normalize(
-            PyPredict.args["Normalization_Method"],
-            Array=API_Interface.data[
-                PyPredict.args["Targeted_Ticker"][
-                    PyPredict.args["Targeted_Variable"]
-                ]
-            ]
-        )
+    Normalized = ML.Normalize(
+        PyPredict.args["Normalization_Method"],
+        Matrix=API_Interface.data[PyPredict.args["Targeted_Ticker"]]
+    )
 
     Splitter = ML.LSTM_Prep(
         ratio=PyPredict.args["Train-Test-Validation-Split"],
@@ -130,6 +121,43 @@ def Run_Grovers():
     )
     return{
         "payload":results,
+        "error":None
+    }
+
+@app.route("/FetchJSON",methods=['GET'])
+def FetchJSON():
+
+    #read JSON files
+    ticker = (request.args.get("ticker")+"_data.json").encode('utf-8')
+    lib = ctypes.CDLL("./lib/ReadJSON.dll")
+    get = lib.Fetch
+    get.argtypes = [ctypes.c_char_p]
+    get.restype = ctypes.c_char_p
+    JSON_String = get(ticker)
+    Marshalled=json.loads(JSON_String.decode("utf-8"))
+    Open = PyPredict.np.array([x["open"] for x in Marshalled],dtype=PyPredict.np.float64)
+    lib = ctypes.CDLL("./lib/MA_Models.dll")
+    carray = Open.ctypes.data_as(
+        ctypes.POINTER(ctypes.c_double)
+    )
+
+
+    #moving average 
+    lib = ctypes.CDLL("./lib/Statistics.dll")
+    ptr = lib.GetArrayPointer
+    ptr.argtypes = [ctypes.c_int]
+    ptr.restype = ctypes.POINTER(ctypes.c_double)
+    open_pointer = ptr(0)
+    Initializer = lib.InitializeOHLC
+    Initializer.argtypes = [ctypes.POINTER(ctypes.c_double),ctypes.POINTER(ctypes.c_double)]
+    Initializer(
+        open_pointer,
+        carray
+    )
+    ATR = lib.ATR
+    ATR.restype=ctypes.c_double
+    return{ 
+        "payload":ATR(),
         "error":None
     }
 

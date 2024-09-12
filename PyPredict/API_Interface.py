@@ -21,16 +21,14 @@ def _downloader(ticker,timeframe):
                 end=datetime(*args["to"])
             )
         ).json())["data"][ticker]
-        print(type(data))
-        print(data[0:40])
+        for x in data:
+            data[x]["name"]=data[x]["symbol"]
+            del data[x]["symbol"]
         with open(f"{ticker}_data.json","w+") as F:
             json.dump(data,F)
+
     except AttributeError:
         print(f"Could not download data for {ticker}, skipping")
-
-def FetchJSON(ticker):
-    with open(f"{ticker}_data.json","r") as F:
-        return json.load(F)
 
 def load(timeframe=alpaca.data.timeframe.TimeFrame.Minute):
     tickers=args["tickers"]
@@ -66,7 +64,7 @@ def load(timeframe=alpaca.data.timeframe.TimeFrame.Minute):
     for file,ticker in zip(files,tickers):
         if ticker in on_hand:
             continue
-        df = pd.read_json(file, orient ='split', compression = 'infer')
+        df = pd.read_json(file, orient ='split', compression = 'infer')#AttributeError: 'list' object has no attribute 'items'
         data[ticker]=df
 
     os.chdir(cwd)
