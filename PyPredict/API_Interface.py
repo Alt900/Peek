@@ -8,9 +8,9 @@ import alpaca
 
 cwd=os.getcwd()
 data={}
+DataDirectory=cwd+f"{filesystem}MarketData"
 
-
-def _downloader(ticker,timeframe):
+def downloader(ticker,timeframe):
     __client = StockHistoricalDataClient(args["alpaca_key"],args["alpaca_secret"])
     try:
         data=json.loads(__client.get_stock_bars(
@@ -21,9 +21,6 @@ def _downloader(ticker,timeframe):
                 end=datetime(*args["to"])
             )
         ).json())["data"][ticker]
-        for x in data:
-            data[x]["name"]=data[x]["symbol"]
-            del data[x]["symbol"]
         with open(f"{ticker}_data.json","w+") as F:
             json.dump(data,F)
 
@@ -32,18 +29,16 @@ def _downloader(ticker,timeframe):
 
 def load(timeframe=alpaca.data.timeframe.TimeFrame.Minute):
     tickers=args["tickers"]
-    DataDirectory=cwd+f"{filesystem}react_gui{filesystem}public{filesystem}Assets{filesystem}MarketData"
     os.chdir(DataDirectory)
     print(os.getcwd())
 
-    #check for cache arg and cached files
     Cached=[x.split("_")[0] for x in os.listdir(DataDirectory)]
     if not(args["Omit_Cache"]):
         if len(Cached)>0:
             todownload=[x for x in tickers if x not in Cached]
             print(f"Found pre-existing data for the following tickers, skipping them:\n{Cached}.")
         else:
-            print(f"No pre-existing data found for the following tickers:\n{tickers}.")
+            print(f"No pre-existing data found for the following tickers:\n{Cached}.")
             todownload=tickers
     else:
         todownload=tickers
@@ -54,17 +49,15 @@ def load(timeframe=alpaca.data.timeframe.TimeFrame.Minute):
     if len(todownload)>0:
         print("Downloading...")
         for x in todownload:
-            data[x]=_downloader(x,timeframe=timeframe)
+            data[x]=downloader(x,timeframe=timeframe)
         print("Download complete.")
     else:
         print("No tickers found to scrape data for, passing download.")
 
     files=[x for x in os.listdir(DataDirectory) if not(any([x.endswith(".py"),x.endswith(".ini")]))]
-    on_hand=[x for x in data]
-    for file,ticker in zip(files,tickers):
-        if ticker in on_hand:
-            continue
-        df = pd.read_json(file, orient ='split', compression = 'infer')#AttributeError: 'list' object has no attribute 'items'
-        data[ticker]=df
+    
+    for file in files:
+        df = pd.read_json(file)
+        data[file.split("_")[0]]=df
 
     os.chdir(cwd)

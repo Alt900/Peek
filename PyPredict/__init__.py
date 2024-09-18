@@ -13,14 +13,16 @@ from matplotlib.lines import Line2D
 matplotlib.use('Agg')
 
 filesystem="\\" if os.name=="nt" else "/"
-plt.style.use(f"react_gui{filesystem}public{filesystem}Assets{filesystem}Matplotlib_style_sheet.mplstyle")
+plt.style.use("Matplotlib_style_sheet.mplstyle")
 plt.grid()
-filesystem="\\" if os.name=="nt" else "/"
 
 #defined top-level to pass down to the rest
 #of the module, React will provide the stateupdates through
 #a flask rout refrencing args
 args = {
+    "3D_Render_Engine":"Matplotlib",#or Blender
+
+
     "Epochs":100,
     "Batch_Size":32,
     "Window_Size":5,

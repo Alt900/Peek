@@ -1,8 +1,7 @@
 import React, { useReducer, useState } from "react";
 import Dropdown from 'react-dropdown';
 import Calendar from 'react-calendar';
-import { Object_Reducer, FetchRoute, StateObject_Handler } from "./utils";
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { Object_Reducer, FetchRoute, StateObject_Handler, BarChart } from "./utils";
 
 
 function DownloadDash(){
@@ -10,8 +9,6 @@ function DownloadDash(){
     const CalendarOptions = ["From","To"]; 
 
     const [DownloadedData,SetDownloadedData] = useState([{ name: 'No data loaded'}]);
-
-    const [MinMax,SetMinMax] = useState([0,0]);
 
     const Download_Object = {
         To: null,
@@ -23,7 +20,8 @@ function DownloadDash(){
         SelectedCalendar: "From",
         Tickers: ["LMT","NVDA"],
         Temp_Ticker: "",
-        Selected_DataFile: "LMT"
+        Selected_DataFile: "LMT",
+        currently_rendered: "LMT",
     }
 
     const [Download_State,Set_DownloadState] = useReducer(Object_Reducer,Download_Object);
@@ -42,14 +40,23 @@ function DownloadDash(){
 
     async function FetchJSON(){
         try{
-            const resp = await fetch(`http://localhost:3000/Assets/MarketData/${Download_State.Selected_DataFile}_data.json`);
+            const resp = await fetch(`https://127.0.0.1:5000/FetchJSON?ticker=${Download_State.Selected_DataFile}`);
             if (!resp.ok){
                 console.error(`There was an error fetching JSON from ${Download_State.Selected_DataFile}`)
             }
+            console.log(resp);
             const data = await resp.json();
-            SetDownloadedData([...data]);
+            SetDownloadedData([...data.payload]);
         } catch (err){
             console.error(`There was an error reading the response\n${err}`);
+        }
+    }
+
+    async function DownloadProgress(){
+        try{
+            const source = new EventSource(`https://127.0.0.1:5000/DownloadData`)
+        } catch (err){
+            console.error(`There was an error with the Flask stream\n${err}`)
         }
     }
 
@@ -88,26 +95,6 @@ function DownloadDash(){
                 )
         }
     };
-
-    const RenderAreaChart = React.memo(function RenderAreaChart({DownloadedData,MinMax}){
-        if (DownloadedData.length===1){
-            return(<></>)
-        } else {
-            return (
-            <ResponsiveContainer width="95%" height="90%">
-                <LineChart data={DownloadedData}>
-                    <XAxis dataKey="timestamp"/>
-                    <YAxis domain={MinMax}/>
-                    <CartesianGrid strokeDasharray="3 3"/>
-                    <Tooltip />
-                    <Line type="monotone" dataKey="open" stroke="#8884d8" fillOpacity={1} fill="url(#colorUv)" dot ={false}/>
-                    <Line type="monotone" dataKey="high" stroke="#82ca9d" fillOpacity={1} fill="url(#colorPv)" dot={false}/>
-                    <Line type="monotone" dataKey="low" stroke="#8884d8" fill="#8884d8" dot={false}/>
-                </LineChart>
-            </ResponsiveContainer>
-            )
-        };
-    });
 
     return(
         <div className="Download_Dash">
@@ -214,10 +201,15 @@ function DownloadDash(){
                 onClick={()=>{
                     FetchJSON();
                     const vals = DownloadedData.flatMap(item=>["open","high","low"].map(key=>item[key]));
-                    SetMinMax([Math.min(vals),Math.max(vals)])
+                    StateObject_Handler(
+                        {key:"currently_rendered",target:Download_State.Selected_DataFile},Set_DownloadState,"Dropdown"
+                    );
                 }}
                 >Render Chart Data</button>
-                <RenderAreaChart DownloadData={DownloadedData} MinMax={MinMax}/>
+                <h3>{Download_State.currently_rendered} opening prices</h3>
+                <div className="ChartContainer" style={{overflow:"scroll",bottom:"0",left:"0",width:"100%",height:"90%"}}>
+                    <BarChart data={DownloadedData}/>
+                </div>
             </div>
         </div>
     )

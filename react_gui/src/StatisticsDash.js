@@ -1,8 +1,9 @@
 import React, { useReducer } from "react";
 import Dropdown from 'react-dropdown';
-import { Object_Reducer, FetchRoute, StateObject_Handler } from "./utils";
+import { Object_Reducer, StateObject_Handler } from "./utils";
 
 function StatisticsDash(){
+    let row = -1;
 
     const Statistics_Object = {
         Selected_LR: "Classic",
@@ -23,8 +24,7 @@ function StatisticsDash(){
             "OLS",
             "ARIMA"
         ],
-        Order: [0,0,0],
-        Seasonal_Order: [0,0,0,0],
+        P_Val: 0.5,
         Operations: ["Metrics", "Linear Regression"],
         Selected_Operations: "Metrics",
     }
@@ -40,8 +40,65 @@ function StatisticsDash(){
         Order=[${Statistics_State.Order}]
         &Seasonal_Order=[${Statistics_State.Seasonal_Order}]
         `,
-        "LR_Fit": `https://127.0.0.1:5000/Fit_Model?Model=${Statistics_State.Selected_LR}`,
-        "LR_Predict": `https://127.0.0.1:5000/Model_Predict?Model=${Statistics_State.Selected_LR}`//will predict with exo
+        "Call_LR": `https://127.0.0.1:5000/Fit_Model?Model=${Statistics_State.Selected_LR}`,
+    }
+
+    const MetricsDash = () => (
+        <div className="MetricsDash">
+        </div>
+    )
+
+    const LRDash = () => (//LR dash contains another sub-dash for LR models and each models corresponding parameters
+        <div className="LRDash">
+            {()=>{
+                let i = -1;
+                switch(Statistics_State.Selected_LR){
+                    case "Theta":
+
+                    case "OLS":
+
+                    case "ARIMA":
+
+                    default:
+                        <>
+                            <div className="LR_Parameters" style={{left:"0",top:`${10*i}`}}>
+                                {Statistics_State.Classic_Parameters.map((key,index)=>{
+                                    i++
+                                    return(
+                                        <div className="LR_Parameter_Container">
+                                            <h5 className="LR_Parameter_Label">{key.replaceAll("_"," ")}</h5>
+                                            <input
+                                                className="ML_Input"
+                                                name={key}
+                                                value={Statistics_State["Classic_LR"][key]}
+                                                onChange={
+                                                    (event)=>{
+                                                        StateObject_Handler(
+                                                            {key:key,target:event.target},Set_StatisticsState,typeof Statistics_State["Classic_LR"][key]=="number"?"IntOnly":"null"
+                                                        )}
+                                                    }
+                                            >
+                                            </input>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            <div className="LR_Operations">
+                                
+                            </div>
+                        </>
+                }
+            }}
+        </div>
+    )
+
+    function RenderSubDash(){
+        switch(Statistics_State.Selected_Operations) {
+            case "Linear Regression":
+                return(<LRDash/>)
+            default:
+                return(<MetricsDash/>)
+        }
     }
 
     return(
@@ -63,7 +120,7 @@ function StatisticsDash(){
 
             </div>
             <div className="StatsOpDisplay">
-
+                    {RenderSubDash()}
             </div>
         </div>
     )

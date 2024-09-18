@@ -13,6 +13,7 @@ from PyPredict import QuantumManager
 app_dir = os.getcwd()
 app=Flask(__name__)
 CORS(app)
+ReadJSON = ctypes.CDLL("./lib/ReadJSON.dll")
 
 @app.route("/SetDownloadArgs",methods=['GET'])
 def SetDownloadArgs():
@@ -20,8 +21,6 @@ def SetDownloadArgs():
     PyPredict.args["alpaca_secret"]=request.args.get("Alpaca_secret",type=str)
     tickers = request.args.get("Tickers")
     tickers=[x.replace(" ","") for x in tickers.split(',')]
-    print(tickers)
-    print(type(tickers))
     PyPredict.args["tickers"]=tickers
     PyPredict.args["from"]=json.loads(request.args.getlist("from")[0])
     PyPredict.args["to"]=json.loads(request.args.getlist("to")[0])
@@ -113,10 +112,10 @@ def Run_QASM():
 
 @app.route("/Run_Grovers",methods=['GET'])
 def Run_Grovers():
-    OBJ = QuantumManager.Financial_Algorithms(Qubits=6)
-    OBJ.Grovers()
+    FA = QuantumManager.Financial_Algorithms(Qubits=6)
+    FA.Grovers()
     results = QuantumManager.RunCircuit(
-        OBJ.Circuit,
+        FA.Circuit,
         True
     )
     return{
@@ -126,40 +125,42 @@ def Run_Grovers():
 
 @app.route("/FetchJSON",methods=['GET'])
 def FetchJSON():
-
-    #read JSON files
-    ticker = (request.args.get("ticker")+"_data.json").encode('utf-8')
-    lib = ctypes.CDLL("./lib/ReadJSON.dll")
-    get = lib.Fetch
+    ticker = (f"./MarketData/{request.args.get('ticker')}_data.json").encode('utf-8')
+    get = ReadJSON.Fetch
     get.argtypes = [ctypes.c_char_p]
     get.restype = ctypes.c_char_p
     JSON_String = get(ticker)
     Marshalled=json.loads(JSON_String.decode("utf-8"))
-    Open = PyPredict.np.array([x["open"] for x in Marshalled],dtype=PyPredict.np.float64)
-    lib = ctypes.CDLL("./lib/MA_Models.dll")
-    carray = Open.ctypes.data_as(
-        ctypes.POINTER(ctypes.c_double)
-    )
 
-
-    #moving average 
-    lib = ctypes.CDLL("./lib/Statistics.dll")
-    ptr = lib.GetArrayPointer
-    ptr.argtypes = [ctypes.c_int]
-    ptr.restype = ctypes.POINTER(ctypes.c_double)
-    open_pointer = ptr(0)
-    Initializer = lib.InitializeOHLC
-    Initializer.argtypes = [ctypes.POINTER(ctypes.c_double),ctypes.POINTER(ctypes.c_double)]
-    Initializer(
-        open_pointer,
-        carray
-    )
-    ATR = lib.ATR
-    ATR.restype=ctypes.c_double
     return{ 
-        "payload":ATR(),
+        "payload":Marshalled,
+        "error":None
+    }
+
+@app.route("/QAE",methods=['GET'])
+def QAE():
+    QAE_Type=request.args.get("type",type=str)
+    Qubits=request.args.get("Qubits",type=int)
+    Probability=request.args.get("Probability",type=float)
+    QAE_Args=request.args.get("Args")
+    QAE_Args=[x.replace(" ","") for x in QAE_Args.split(',')]
+    FA = QuantumManager.Financial_Algorithms(Qubits)
+    results = FA.QAE(probability=Probability,QAE_Type=QAE_Type,args=QAE_Args)
+    return {
+        "payload":results,
+        "error":None
+    }
+
+@app.route("/TestCWindow",methods=['GET'])
+def TestCWindow():
+    API_Interface.load()
+    Prep=ML.LSTM_Prep(API_Interface.data["LMT"]["open"])
+    SplitSet=Prep.split(API_Interface.data["LMT"]["open"])
+    WindowedSet=Prep.window(SplitSet=SplitSet)
+    return{
+        "payload":WindowedSet,
         "error":None
     }
 
 if __name__=="__main__":
-    app.run(debug=True,ssl_context=('cert.pem', 'key.pem'))
+    app.run(debug=True, ssl_context=('Peek.crt','Peek.key'))

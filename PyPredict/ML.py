@@ -49,40 +49,21 @@ class LSTM_Prep():
         return result
 
     def window(self,SplitSet):
-        Windowed=[]
-        print(type(SplitSet))
-        for x in range(len(SplitSet.index)):
-            size=len(SplitSet[x])
-            indexes=[]
-            labels=[]
-            initial_rows=int((size-windowsize)/self.time_shift)
-            indexes = [y for y in range(0,size,self.time_shift)]
-
-            indexes=indexes[0:initial_rows]#filters out non-valid windows
-            matrix=np.zeros((len(indexes)-1,windowsize))
-
-            for y in range(len(indexes)):
-                try:
-                    labels.append([SplitSet[x][indexes[y]+windowsize+self.label_size]])#a label needs to be present in order to complete the set
-                    matrix[y]=SplitSet[x][indexes[y]:indexes[y]+windowsize]
-                except IndexError:#if one cannot be grabbed due to the index being out of bounds the windowed set will be dropped
-                    pass
-
-            Windowed.append([matrix[:,:,np.newaxis],np.array(labels)[:,np.newaxis]])
-
-        Windowed_x=[Windowed[0][0].astype(np.float32),Windowed[1][0].astype(np.float32)]
-        Windowed_y=[Windowed[0][1].astype(np.float32),Windowed[1][1].astype(np.float32)]
-        return Windowed_x,Windowed_y
-    
-    def multivariate_window(self,SplitFrame):
-        #Split Matrix needs to be size (len(set)-1,variables)
-        #Windowed Matrix needs to be size (len(set)-1,window_size,variables)
-        #Split Tensor passes size len(ratio)
-        #Windowed Tensor passes size [len(ratio),(len(set)-1,window_size,variables)] 4D tensor
-        Windowed_Matrix=[]
-        for y in SplitFrame[0].keys():
-            Windowed_Matrix.append(self.window([SplitFrame[x][y] for x in range(len(SplitFrame))]))
-        return Windowed_Matrix
+        lib = ctypes.CDLL("./lib/DataHandling.dll")
+        lib.windowsize=window_size
+        Recompiled_Matrices=[]
+        Recompiled_Labels=[]
+        for Set in SplitSet:
+            lib.Array = Set.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+            lib.size = len(Set)
+            lib.Calc_Matrix_Shape()
+            lib.Window_Array()
+            Recompiled_Matrices.append(
+                [list(ctypes.cast(lib.Windowed_Matrix[i],ctypes.POINTER(ctypes.c_double*lib.Windowsize)).contents) for i in range(lib.Row)]
+            )
+            Recompiled_Labels.append(list(ctypes.cast(lib.Windowed_Labels,ctypes.POINTER(ctypes.c_double*lib.Windowsize)).contents))
+        
+        return (Recompiled_Matrices,Recompiled_Labels)
 
 class Feature_Engineering():
     def __init__(self,
@@ -207,18 +188,3 @@ class LSTM():
     def predict(self,x):
         predicted=self.model(torch.tensor(x))
         return predicted.flatten().tolist()
-    
-class Ensemble_LSTM(torch.nn.Module):
-    def __init__(self,model_dispatch,axis_dispatch):
-        super(Ensemble_LSTM, self).__init__()
-        self.model_dispatch=model_dispatch
-        self.XAxis_dispatch=axis_dispatch
-        self.output_dispatch={}
-        self.VotingResults = torch.nn.Linear(32,len(axis_dispatch))
-
-    def forward(self):
-        for x in self.model_dispatch.keys():
-            self.output_dispatch[x]=self.model_dispatch[x](self.XAxis_dispatch[x])
-
-        Votes=torch.cat((x for x in self.output_dispatch),dim=1)
-        return self.VotingResults(Votes)
