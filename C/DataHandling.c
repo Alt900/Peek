@@ -7,40 +7,33 @@
 double *Array;
 int size;
 
-double*** Windowed_Matrix;
-double** Windowed_Labels;
-int Row = 0;
+double **Windowed_Matrix;
+double *Windowed_Labels;
+int Row ;
 int Windowsize;
 
-
-void Calc_Matrix_Shape(){
-    Row = size/Windowsize;
-    double intpart;
-    float remainder = modf(Row,&intpart);
-    float padding = 0;
-    if(remainder!=0.0){
-        for (int x = size; x<size+Windowsize; x++){
-            if (size%Windowsize==0){
-                padding=x;
-                break;
-            }
+double **Generate_Window_Matrix(){
+    Windowed_Matrix = (double**)malloc(Row*sizeof(double*));
+    for(int i = 0; i<Row; i++){
+        Windowed_Matrix[i]=(double*)malloc(Windowsize*SIZEOF_DOUBLE);
+        for(int j = 0; j<Windowsize; j++){
+            Windowed_Matrix[i][j]=Array[i+j];
         }
     }
-    Row = size/(Windowsize+padding);
+    return Windowed_Matrix;
 }
 
-void Window_Array(){
-    *Windowed_Matrix=(double**)malloc(Row*sizeof(double*));
-    *Windowed_Labels=(double*)malloc(Row*sizeof(double));
-
-    for (int i = 0; i<Row; i++){
-        (*Windowed_Matrix)[i]=(double*)malloc(Windowsize*sizeof(double));
-        memcpy((*Windowed_Matrix)[i],&Array[i],Windowsize*sizeof(double));//#row i = Array elements from ith to ith+windowsize
-        (*Windowed_Labels)[i]=Array[Windowsize+i+1];
+double *Generate_Window_Labels(){
+    Windowed_Labels = (double*)malloc(Row*SIZEOF_DOUBLE);
+    for(int i = 0; i<Row; i++){
+        Windowed_Labels[i]=Array[i+Windowsize+1];
     }
+    return Windowed_Labels;
 }
 
-void *FreeArray(){
+void FreeAll(){
+    free(Windowed_Labels);
+    free(Windowed_Labels);
     free(Array);
 }
 

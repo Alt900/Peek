@@ -25,8 +25,6 @@ def int_to_dt(dtcolumn):
         dt.fromtimestamp(x) for x in dtcolumn
     ]
 
-windowsize=args["Window_Size"]
-
 class LSTM_Prep():
     def __init__(self,
         ratio=(.7,.3),
@@ -54,15 +52,35 @@ class LSTM_Prep():
         Recompiled_Matrices=[]
         Recompiled_Labels=[]
         for Set in SplitSet:
-            lib.Array = Set.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+            temp_matrix = []
+            temp_labels = []
+
+            lib.Array = np.array(Set).ctypes.data_as(ctypes.POINTER(ctypes.c_double))
             lib.size = len(Set)
-            lib.Calc_Matrix_Shape()
-            lib.Window_Array()
-            Recompiled_Matrices.append(
-                [list(ctypes.cast(lib.Windowed_Matrix[i],ctypes.POINTER(ctypes.c_double*lib.Windowsize)).contents) for i in range(lib.Row)]
-            )
-            Recompiled_Labels.append(list(ctypes.cast(lib.Windowed_Labels,ctypes.POINTER(ctypes.c_double*lib.Windowsize)).contents))
-        
+            lib.Windowsize=window_size
+            lib.Row=round(lib.size/window_size)
+
+            Window_Generator = lib.Generate_Window_Matrix
+            Labels_Generator = lib.Generate_Window_Labels
+
+            Window_Generator.restype=ctypes.POINTER(ctypes.POINTER(ctypes.c_double))
+            Labels_Generator.restype=ctypes.POINTER(ctypes.c_double)
+
+            Windowed_Matrix = Window_Generator()
+            Windowed_Labels = Labels_Generator()
+
+            for i in range(lib.Row):
+                temp_matrix.append(
+                    [Windowed_Matrix[i][j] for j in range(window_size)]
+                )
+                temp_labels.append(
+                    Windowed_Labels[i]
+                )
+                print(Windowed_Matrix[i][0:4])
+
+            Recompiled_Matrices.append(temp_matrix)
+            Recompiled_Labels.append(temp_labels)
+        lib.FreeAll()
         return (Recompiled_Matrices,Recompiled_Labels)
 
 class Feature_Engineering():

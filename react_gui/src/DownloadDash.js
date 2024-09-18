@@ -52,15 +52,6 @@ function DownloadDash(){
         }
     }
 
-    async function DownloadProgress(){
-        try{
-            const source = new EventSource(`https://127.0.0.1:5000/DownloadData`)
-        } catch (err){
-            console.error(`There was an error with the Flask stream\n${err}`)
-        }
-    }
-
-
     const RenderCalendar = () => {
         switch(Download_State.SelectedCalendar){
             case "From":
