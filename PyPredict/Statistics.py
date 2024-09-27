@@ -27,6 +27,10 @@ class Diagnostics():
 
     def diagnose_heteroskedasticity(self,test:str):
         return self.heteroskedasticity_tests[test.lower()]
+    
+    def Z_Score(self,std,mean,row):
+        for x in range(len(row)):
+            row[x]=(row[x]-mean)/std
 
 class Regression_Models():
     def __init__(self,dependent, independent):
@@ -35,57 +39,66 @@ class Regression_Models():
         self.independent = independent
         self.quick_regression = lambda : np.poly1d(np.polyfit(dependent.index,dependent.values,1))
 
-    def Ordinary_least_squares(self,pval_threshold):
-        self.pval_threshold = pval_threshold
-        independent=api.add_constant(self.independent)
-        self.model=api.OLS(self.dependent,exog=independent).fit()
-        print(dir(self.model))
+    def Ordinary_least_squares(self,missing,hasconst):
+        dependent = api.add_constant(self.dependent)
+        independent = api.add_constant(self.independent)
+        self.model=api.OLS(endog=self.dependent,exog=self.independent,missing=missing,hasconst=hasconst).fit()
+        return self.model.summary()
     
-    def Theta(self,period,future_steps):
-        self.model = ThetaModel(self.dependent,period=period).fit()
-        self.forecast = self.model.forecast(future_steps)
+    def Theta(self,period,future_steps,deseasonalize,use_test,method,difference):
+        if period=="None":
+            self.model = ThetaModel(
+                self.dependent,
+                deseasonalize=deseasonalize,
+                use_test=use_test,
+                method=method,
+                difference=difference
+            ).fit()
+        else:
+            self.model = ThetaModel(
+                self.dependent,
+                period=period,
+                deseasonalize=deseasonalize,
+                use_test=use_test,
+                method=method,
+                difference=difference
+            ).fit()
+        return self.model
     
-    def ARIMA(self,pdq):
-        self.model = ARIMA(self.dependent,exog=self.independent,order=pdq).fit()
+    def ARIMA(self,order,seasonal_order,trend,enforce_stationarity,enforce_invertibility,concentrate_scale,trend_offset,validate_specification,missing,frequency):
+        
+        if frequency=="None":
+            self.model = ARIMA(
+                self.dependent,
+                exog=self.independent,
+                order=order,
+                seasonal_order=seasonal_order,
+                trend=trend,
+                enforce_stationarity=enforce_stationarity,
+                enforce_invertibility=enforce_invertibility,
+                concentrate_scale=concentrate_scale,
+                trend_offset=trend_offset,
+                validate_specification=validate_specification,
+                missing=missing
+            )
+        else:
+            self.model = ARIMA(
+                self.dependent,
+                exog=self.independent,
+                order=order,
+                seasonal_order=seasonal_order,
+                trend=trend,
+                enforce_stationarity=enforce_stationarity,
+                enforce_invertibility=enforce_invertibility,
+                concentrate_scale=concentrate_scale,
+                trend_offset=trend_offset,
+                validate_specification=validate_specification,
+                missing=missing,
+                freq=frequency
+            )
+        return self.model.fit()
 
     def __setattr__(self, name: str, value):
         super().__setattr__(name,value)
         if name!="diagnostics":
             setattr(self.diagnostics,name,value)
-
-class Technical_Indicators():
-    def __init__(self,time_series):
-        self.time_series=time_series
-
-    def EWMA(self,variable,window_size):
-        weights = np.exp(np.linspace(-1.,0.,window_size))
-        weights /= weights.sum()
-        convolution = np.convolve(variable,weights,mode='full')[:len(variable)]
-        convolution[:window_size] = convolution[window_size]
-        return convolution
-
-    def product(self,x):
-        sub_x, sub_y = self.time_series.index, self.time_series.values
-        n=len(sub_x)
-        datapoint = 0
-        print(f"interpolating datapoint {x}")
-        matrix=np.zeros((n,n),dtype=float)
-        for i in range(n):
-            term = sub_y[i]
-            for j in range(n):
-                if j!=i:
-                    if j!=1:
-                        matrix[i][j] = matrix[i][j-1]*(x-sub_x[j])/(sub_x[i]-sub_x[j])
-                    else:
-                        matrix[i][j] = term*(x-sub_x[j])/(sub_x[i]-sub_x[j])
-                else:
-                    matrix[i][j]=1
-            datapoint += term
-        return sum(sum(matrix))
-
-    def Lagrange_Interpolation(self,to_interpolate):
-        interpolated_set=[]
-        for x in to_interpolate:
-            interpolated_set.append(self.product(x))
-
-        return interpolated_set

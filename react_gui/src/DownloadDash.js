@@ -1,48 +1,32 @@
-import React, { useReducer, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import Dropdown from 'react-dropdown';
 import Calendar from 'react-calendar';
 import { Object_Reducer, FetchRoute, StateObject_Handler, BarChart } from "./utils";
 
 
-function DownloadDash(){
+function DownloadDash({state,dispatcher}){
 
     const CalendarOptions = ["From","To"]; 
 
     const [DownloadedData,SetDownloadedData] = useState([{ name: 'No data loaded'}]);
 
-    const Download_Object = {
-        To: null,
-        From: null,
-        ToDateObject: null,
-        FromDateObject: null,
-        Alpaca_key: "",
-        Alpaca_secret: "",
-        SelectedCalendar: "From",
-        Tickers: ["LMT","NVDA"],
-        Temp_Ticker: "",
-        Selected_DataFile: "LMT",
-        currently_rendered: "LMT",
-    }
-
-    const [Download_State,Set_DownloadState] = useReducer(Object_Reducer,Download_Object);
-
-    let Datafile_Options = Download_State.Tickers
+    let Datafile_Options = state.Tickers
 
     const Data_Router = {
-        "SetDownloadArgs":`https:127.0.0.1:5000/SetDownloadArgs?Tickers=${Download_State.Tickers}
-        &Alpaca_key=${Download_State.Alpaca_key}
-        &Alpaca_secret=${Download_State.Alpaca_secret}
-        &from=[${Download_State.From}]
-        &to=[${Download_State.To}]`,
+        "SetDownloadArgs":`https:127.0.0.1:5000/SetDownloadArgs?Tickers=${state.Tickers}
+        &Alpaca_key=${state.Alpaca_key}
+        &Alpaca_secret=${state.Alpaca_secret}
+        &from=[${state.From}]
+        &to=[${state.To}]`,
 
         "DownloadData":"https://127.0.0.1:5000/DownloadData",
     }
 
     async function FetchJSON(){
         try{
-            const resp = await fetch(`https://127.0.0.1:5000/FetchJSON?ticker=${Download_State.Selected_DataFile}`);
+            const resp = await fetch(`https://127.0.0.1:5000/FetchJSON?ticker=${state.Selected_DataFile}`);
             if (!resp.ok){
-                console.error(`There was an error fetching JSON from ${Download_State.Selected_DataFile}`)
+                console.error(`There was an error fetching JSON from ${state.Selected_DataFile}`)
             }
             console.log(resp);
             const data = await resp.json();
@@ -53,7 +37,7 @@ function DownloadDash(){
     }
 
     const RenderCalendar = () => {
-        switch(Download_State.SelectedCalendar){
+        switch(state.SelectedCalendar){
             case "From":
                 return(
                     <Calendar 
@@ -63,10 +47,10 @@ function DownloadDash(){
                             (event)=>{
                                 StateObject_Handler(
                                     {key:"From",target:event},
-                                    Set_DownloadState,
+                                    dispatcher,
                                     "Date",
                                 )}}
-                        value={Download_State.FromDateObject}
+                        value={state.FromDateObject}
                     />
                 )
             default:
@@ -78,10 +62,10 @@ function DownloadDash(){
                             (event)=>{
                                 StateObject_Handler(
                                     {key:"To",target:event},
-                                    Set_DownloadState,
+                                    dispatcher,
                                     "Date",
                                 )}}
-                        value={Download_State.ToDateObject}
+                        value={state.ToDateObject}
                     />
                 )
         }
@@ -94,12 +78,12 @@ function DownloadDash(){
                     <input
                         className="Temp_Ticker"
                         name="Temp_Ticker"
-                        value={Download_State.Temp_Ticker}
+                        value={state.Temp_Ticker}
                         onChange={
                             (event)=>{
                                 StateObject_Handler(
                                     {key:"Temp_Ticker",target:event.target},
-                                    Set_DownloadState
+                                    dispatcher
                                 )}
                             }
                     />
@@ -107,15 +91,15 @@ function DownloadDash(){
                     className="AppendTicker"
                     onClick={
                         ()=>{
-                            if (Download_State.Temp_Ticker.length===3 || Download_State.Temp_Ticker.length===4){
+                            if (state.Temp_Ticker.length===3 || state.Temp_Ticker.length===4){
                                 StateObject_Handler({
                                     key:"Tickers",
-                                    target:[Download_State.Tickers,Download_State.Temp_Ticker]
-                                },Set_DownloadState,"AppendTickers");
+                                    target:[state.Tickers,state.Temp_Ticker]
+                                },dispatcher,"AppendTickers");
                                 StateObject_Handler({
                                     key:"Temp_Ticker",
                                     target:""
-                                },Set_DownloadState);
+                                },dispatcher);
                             }
                         }
                     }
@@ -123,31 +107,32 @@ function DownloadDash(){
                     <textarea
                     className="CurrentTickers"
                     name="Tickers"
-                    value={Download_State.Tickers}/>
+                    value={state.Tickers}/>
+                    <div className="CurrentTickers_BackShadow"/>
                 </div>
-                <h5 className="keylabel">API key</h5>
+                <h5 className="keylabel">API key:</h5>
                 <input
                 className="key"
                 name="Alpaca_key"
-                value={Download_State.Alpaca_key}
+                value={state.Alpaca_key}
                 onChange={
                     (event)=>{
                         StateObject_Handler(
                             {key:"Alpaca_key",target:event.target},
-                            Set_DownloadState
+                            dispatcher
                         )}
                     }
                 ></input>
-                <h5 className="secretlabel">API secret</h5>
+                <h5 className="secretlabel">API secret:</h5>
                 <input
                 className="secret"
                 name="Alpaca_secret"
-                value={Download_State.Alpaca_secret}
+                value={state.Alpaca_secret}
                 onChange={
                     (event)=>{
                         StateObject_Handler(
                             {key:"Alpaca_secret",target:event.target},
-                            Set_DownloadState
+                            dispatcher
                         )}
                     }
                 ></input>
@@ -155,7 +140,7 @@ function DownloadDash(){
                 className="DownloadTickers"
                 onClick={()=>{
                     FetchRoute(Data_Router,null,"SetDownloadArgs");
-                    FetchRoute(Data_Router,null,"DownloadData");
+                    FetchRoute(Data_Router,null,"DownloadData")
                 }}
                 >Download
                 </button>
@@ -165,10 +150,10 @@ function DownloadDash(){
                     onChange={
                         (event)=>{
                             StateObject_Handler(
-                                {key:"SelectedCalendar",target:event.value},Set_DownloadState,"Dropdown"
+                                {key:"SelectedCalendar",target:event.value},dispatcher,"Dropdown"
                             )}
                         }
-                    value={Download_State.SelectedCalendar}
+                    value={state.SelectedCalendar}
                     placeholder={CalendarOptions[0]}
                 />
                 {RenderCalendar()}
@@ -180,31 +165,30 @@ function DownloadDash(){
                     onChange={
                         (event)=>{
                             StateObject_Handler(
-                                {key:"Selected_DataFile",target:event.value},Set_DownloadState,"Dropdown"
+                                {key:"Selected_DataFile",target:event.value},dispatcher,"Dropdown"
                             );
                         }
                     }
-                    value={Download_State.Selected_DataFile}
+                    value={state.Selected_DataFile}
                     placeholder={Datafile_Options[0]}
                 />
                 <button
                 className="Data_Render"
                 onClick={()=>{
                     FetchJSON();
-                    const vals = DownloadedData.flatMap(item=>["open","high","low"].map(key=>item[key]));
+                    //const vals = DownloadedData.flatMap(item=>["open","high","low"].map(key=>item[key]));
                     StateObject_Handler(
-                        {key:"currently_rendered",target:Download_State.Selected_DataFile},Set_DownloadState,"Dropdown"
+                        {key:"currently_rendered",target:state.Selected_DataFile},dispatcher,"Dropdown"
                     );
                 }}
                 >Render Chart Data</button>
-                <h3>{Download_State.currently_rendered} opening prices</h3>
-                <div className="ChartContainer" style={{overflow:"scroll",bottom:"0",left:"0",width:"100%",height:"90%"}}>
+                <h3 className="Display_Label">{state.currently_rendered} Candlestick</h3>
+                <div className="ChartContainer">
                     <BarChart data={DownloadedData}/>
                 </div>
             </div>
         </div>
     )
-
 };
 
 export default DownloadDash;

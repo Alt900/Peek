@@ -1,108 +1,277 @@
-import React, { useReducer } from "react";
+import React, { useEffect, useState } from "react";
 import Dropdown from 'react-dropdown';
-import { Object_Reducer, StateObject_Handler } from "./utils";
+import { StateObject_Handler, FetchRoute, Statistics_Canvas } from "./utils";
 
-function StatisticsDash(){
-    let row = -1;
+function StatisticsDash({state,dispatcher,ArimaParams,SetArimaParams,ThetaParams,SetThetaParams,OLSParams,SetOLSParams,Metrics_Checked,SetMetrics_Checked,ClassicParams,SetClassicParams,Statistics_State,Set_StatisticsState,MetricsCache,SetMetricsCache}){
+    let column = 1;
+    let row = 0;
 
-    const Statistics_Object = {
-        Selected_LR: "Classic",
-        Endo: null,
-        Exo: null,
-        Variables:[
-            "Open",
-            "High",
-            "Low",
-            "Close",
-            "Volume",
-            "Trade_Count",
-            "VWAP"
-        ],
-        LR_Models: [
-            "Classic",
-            "Theta",
-            "OLS",
-            "ARIMA"
-        ],
-        P_Val: 0.5,
-        Operations: ["Metrics", "Linear Regression"],
-        Selected_Operations: "Metrics",
-    }
+    const [FormOpen,SetFormOpen] = useState(false);
 
-    const [Statistics_State,Set_StatisticsState] = useReducer(Object_Reducer,Statistics_Object);
+    const [FormKey,SetFormKey] = useState(null);
+
+    const [LR_ChartData, Set_LR_ChartData] = useState([{ name: 'No data loaded'}]);
+
+    const [LR_Summary,Set_LR_Summary] = useState("No Linear Regression Model has been ran yet.")
 
     const Statistics_Router = {
-        "Set_Exo_Endo": `https://127.0.0.1:5000/Set_Exo_Endo?
-        Endo=${Statistics_State.Endo}
-        &Exo=${Statistics_State.Exo}
-        `,
-        "Set_ARIMA_Params": `https://127.0.0.1:5000/Set_ARIMA_Params?
-        Order=[${Statistics_State.Order}]
-        &Seasonal_Order=[${Statistics_State.Seasonal_Order}]
-        `,
-        "Call_LR": `https://127.0.0.1:5000/Fit_Model?Model=${Statistics_State.Selected_LR}`,
+        "Run_ARIMA": `https://127.0.0.1:5000/Run_ARIMA?order=${ArimaParams.order}&seasonal_order=${ArimaParams.seasonal_order}&trend=${ArimaParams.trend}&enforce_stationarity=${ArimaParams.enforce_stationarity}&enforce_invertibility=${ArimaParams.enforce_invertibility}&concentrate_scale=${ArimaParams.concentrate_scale}&trend_offset=${ArimaParams.trend_offset}&validate_specification=${ArimaParams.validate_specification}&missing=${ArimaParams.missing}&frequency=${ArimaParams.frequency}&ticker=${ArimaParams.ticker}&dependent=${ArimaParams.dependent}&independent=${ArimaParams.independent}`,
+        "Run_Theta":`https://127.0.0.1:5000/Run_Theta?period=${ThetaParams.period}&deseasonalize=${ThetaParams.deseasonalize}&use_test=${ThetaParams.use_test}&method=${ThetaParams.method}&difference=${ThetaParams.difference}&ticker=${ThetaParams.ticker}&dependent=${ThetaParams.dependent}&independent=${ThetaParams.independent}&toforecast=${ThetaParams.ForecastInterval}`,
+        "Run_OLS":`https://127.0.0.1:5000/Run_OLS?missing=${OLSParams.missing}&hasconst=${OLSParams.hasconst}&ticker=${OLSParams.ticker}&dependent=${OLSParams.dependent}&independent=${OLSParams.independent}`,
+        "Run_Classic":`https://127.0.0.1:5000/Run_ClassicLR?ticker=${ClassicParams.ticker}&dependent=${ClassicParams.dependent}&independent=${ClassicParams.independent}`,
+        //"GetMetric": (Method)=>{`https://127.0.0.1:5000/FetchMetric?${Method}&ticker=`}
     }
 
-    const MetricsDash = () => (
-        <div className="MetricsDash">
-        </div>
-    )
+    //dragging handlers
+    const [offset,setoffset] = useState({x:0,y:0})
+    const [isdragging,setisdragging] = useState(false);
+    const [position,setposition] = useState({x:0,y:0})
 
-    const LRDash = () => (//LR dash contains another sub-dash for LR models and each models corresponding parameters
-        <div className="LRDash">
-            {()=>{
-                let i = -1;
-                switch(Statistics_State.Selected_LR){
-                    case "Theta":
+    const HandleMouseDown = (event) => {
+        setisdragging(true);
+        setoffset({x:event.clientX-position.x,y:event.clientY-position.y,});
+    };
 
-                    case "OLS":
+    const HandleMouseMove = (event) => {
+        if(isdragging){
+            setposition({x:event.clientX-offset.x,y:event.clientY-offset.y});
+        }
+    };
 
-                    case "ARIMA":
+    const HandleMouseUp = () => {
+        setisdragging(false);
+    }
 
-                    default:
-                        <>
-                            <div className="LR_Parameters" style={{left:"0",top:`${10*i}`}}>
-                                {Statistics_State.Classic_Parameters.map((key,index)=>{
-                                    i++
-                                    return(
-                                        <div className="LR_Parameter_Container">
-                                            <h5 className="LR_Parameter_Label">{key.replaceAll("_"," ")}</h5>
+    const AddMetricToObject = (key,value) => {
+        SetMetricsCache(previous => ({
+            ...previous,
+            [key]:value
+        }))
+    }
+
+    const PopMetricFromObject = (key) => {
+        SetMetricsCache(previous => {
+            const copy = {...previous};
+            delete copy[key];
+            return copy;
+        });
+    }
+
+    const DispatchLRForm = () => {
+        switch(FormKey){
+            case "Autoregressive_Integrated_Moving_Average":
+                if(FormOpen){
+                    return(
+                        <div>
+                            <div className="Form" onMouseDown={HandleMouseDown} onMouseMove={HandleMouseMove} onMouseUp={HandleMouseUp} style={{left:`${position.x}px`,top:`${position.y}px`,cursor: isdragging ? 'grabbing' : 'grab',}}>
+                                <button className="CloseForm" onClick={()=>{SetFormOpen(false)}}>X</button>
+                                <h2 style={{fontSize:"15px"}}>
+                                    Autoregressive Integrated Moving Average Parameters
+                                </h2>
+                                {
+                                    Object.keys(ArimaParams).map((key,_)=>{
+                                        return(
+                                            <>
+                                            <label>{key.replaceAll("_"," ")}</label>
+                                            <br/>
                                             <input
-                                                className="ML_Input"
+                                                className="FormInput"
                                                 name={key}
-                                                value={Statistics_State["Classic_LR"][key]}
-                                                onChange={
-                                                    (event)=>{
-                                                        StateObject_Handler(
-                                                            {key:key,target:event.target},Set_StatisticsState,typeof Statistics_State["Classic_LR"][key]=="number"?"IntOnly":"null"
-                                                        )}
-                                                    }
-                                            >
-                                            </input>
-                                        </div>
-                                    )
-                                })}
+                                                value={ArimaParams[key]}
+                                                placeholder={ArimaParams[key]}
+                                                onChange={(event)=>StateObject_Handler({key:key,target:event.target},SetArimaParams)}
+                                            ></input>
+                                            <br/>
+                                            <br/>
+                                            </>
+                                        );
+                                    })
+                                }
+                                <br/>
+                                <button
+                                    className="FormButton"
+                                    onClick={()=>{FetchRoute(Statistics_Router,Set_StatisticsState,"Run_ARIMA","LR_Results")}}
+                                >Run ARIMA</button>
                             </div>
-                            <div className="LR_Operations">
-                                
-                            </div>
-                        </>
+                        </div>
+                    );
                 }
-            }}
-        </div>
-    )
-
-    function RenderSubDash(){
-        switch(Statistics_State.Selected_Operations) {
-            case "Linear Regression":
-                return(<LRDash/>)
+            case "Theta":
+                if(FormOpen){
+                    return(
+                        <div>
+                            <div className="Form" onMouseDown={HandleMouseDown} onMouseMove={HandleMouseMove} onMouseUp={HandleMouseUp} style={{left:`${position.x}px`,top:`${position.y}px`,cursor: isdragging ? 'grabbing' : 'grab',}}>
+                                <button className="CloseForm" onClick={()=>{SetFormOpen(false)}}>X</button>
+                                <h2 style={{fontSize:"15px"}}>
+                                    Theta Model Parameters
+                                </h2>
+                                {
+                                    Object.keys(ThetaParams).map((key,_)=>{
+                                        return(
+                                            <>
+                                            <label>{key.replaceAll("_"," ")}</label>
+                                            <br/>
+                                            <input
+                                                className="FormInput"
+                                                name={key}
+                                                value={ThetaParams[key]}
+                                                placeholder={ThetaParams[key]}
+                                                onChange={(event)=>StateObject_Handler({key:key,target:event.target},SetThetaParams)}
+                                            ></input>
+                                            <br/>
+                                            <br/>
+                                            </>
+                                        );
+                                    })
+                                }
+                                <br/>
+                                <button
+                                    className="FormButton"
+                                    onClick={()=>{FetchRoute(Statistics_Router,Set_StatisticsState,"Run_Theta","LR_Results")}}
+                                >Run Theta</button>
+                            </div>
+                        </div>
+                    );
+                }
+            case "Ordinary_least_squares":
+                if(FormOpen){
+                    return(
+                        <div>
+                            <div className="Form" onMouseDown={HandleMouseDown} onMouseMove={HandleMouseMove} onMouseUp={HandleMouseUp} style={{left:`${position.x}px`,top:`${position.y}px`,cursor: isdragging ? 'grabbing' : 'grab',}}>
+                                <button className="CloseForm" onClick={()=>{SetFormOpen(false)}}>X</button>
+                                <h2 style={{fontSize:"15px"}}>
+                                    Ordinary Least Squares Model Parameters
+                                </h2>
+                                {
+                                    Object.keys(OLSParams).map((key,_)=>{
+                                        return(
+                                            <>
+                                            <label>{key.replaceAll("_"," ")}</label>
+                                            <br/>
+                                            <input
+                                                className="FormInput"
+                                                name={key}
+                                                value={OLSParams[key]}
+                                                placeholder={OLSParams[key]}
+                                                onChange={(event)=>StateObject_Handler({key:key,target:event.target},SetOLSParams)}
+                                            ></input>
+                                            <br/>
+                                            <br/>
+                                            </>
+                                        );
+                                    })
+                                }
+                                <br/>
+                                <button
+                                    className="FormButton"
+                                    onClick={()=>{FetchRoute(Statistics_Router,Set_StatisticsState,"Run_OLS","LR_Results")}}
+                                >Run OLS</button>
+                            </div>
+                        </div>
+                    );
+                }
             default:
-                return(<MetricsDash/>)
+                if(FormOpen){
+                    return(
+                        <div>
+                            <div className="Form" onMouseDown={HandleMouseDown} onMouseMove={HandleMouseMove} onMouseUp={HandleMouseUp} style={{left:`${position.x}px`,top:`${position.y}px`,cursor: isdragging ? 'grabbing' : 'grab',}}>
+                                <button className="CloseForm" onClick={()=>{SetFormOpen(false)}}>X</button>
+                                <h2 style={{fontSize:"15px"}}>
+                                    Classic Linear Regression Model Parameters
+                                </h2>
+                                {
+                                    Object.keys(ClassicParams).map((key,_)=>{
+                                        return(
+                                            <>
+                                            <label>{key.replaceAll("_"," ")}</label>
+                                            <br/>
+                                            <input
+                                                className="FormInput"
+                                                name={key}
+                                                value={ClassicParams[key]}
+                                                placeholder={ClassicParams[key]}
+                                                onChange={(event)=>StateObject_Handler({key:key,target:event.target},SetClassicParams)}
+                                            ></input>
+                                            <br/>
+                                            <br/>
+                                            </>
+                                        );
+                                    })
+                                }
+                                <br/>
+                                <button
+                                    className="FormButton"
+                                    onClick={()=>{FetchRoute(Statistics_Router,Set_StatisticsState,"Run_Classic","LR_Results")}}
+                                >Run Classic LR</button>
+                            </div>
+                        </div>
+                    );
+                }
+        }
+    }
+
+    const RenderOperations = () => {
+        switch(Statistics_State.Selected_Operations){
+            case "Metrics":
+                return(
+                    Object.keys(Metrics_Checked).map((key,index)=>{
+                        row += 1
+                        return(
+                            <div className="Metrics_Container" style={{top:`${row*8}%`}}>
+                                <label className = "Metrics_Label">{key}</label>
+                                <input
+                                    className="Metric_checkboxes"
+                                    type="checkbox"
+                                    checked={Metrics_Checked[key]}
+                                    name={key}
+                                    onChange={()=>{
+                                        StateObject_Handler(
+                                            {key:key,target:!Metrics_Checked[key]},
+                                            SetMetrics_Checked,
+                                            null
+                                        );
+                                        if(Metrics_Checked[key]===true){
+                                            AddMetricToObject(key,FetchRoute(
+                                                Statistics_Router
+                                            ));
+                                        } else {
+                                            PopMetricFromObject(key);
+                                        }
+                                    }}
+                                ></input>
+                            </div>
+                        )
+                    })
+                )
+
+            default:
+                return(
+                    [
+                        "Classic_linear_regression",
+                        "Ordinary_least_squares",
+                        "Autoregressive_Integrated_Moving_Average",
+                        "Theta"
+                    ].map((key,index)=>{
+                        if(index%1===0 && index!==0){
+                            column+=1
+                        }
+                        return(
+                            <button
+                                className="SLR_Button"
+                                style={{left:`${row*20}%`,top:`${column*8}%`,z_index:"1"}}
+                                name={key}
+                                onClick={()=>{SetFormKey(key);DispatchLRForm();SetFormOpen(true)}}
+                            >{key.replaceAll("_"," ")}</button>
+                        )
+                    })
+                )
         }
     }
 
     return(
         <div>
+            {DispatchLRForm()}
+            {console.log(document.getElementById("LRForm"))}
             <div className="Stats_Operations">
                 <Dropdown
                     className="Operation_Selection"
@@ -115,12 +284,15 @@ function StatisticsDash(){
                     value={Statistics_State.Selected_Operations}
                     placeholder={Statistics_State.Operations[0]}
                 />
+                {RenderOperations()}
             </div>
-            <div className="StatsOpOutput">
-
-            </div>
-            <div className="StatsOpDisplay">
-                    {RenderSubDash()}
+            <textarea
+            className="Stats_Report"
+            value={Statistics_State.LR_Results.replace(/\\n/g, '\n')}
+            readOnly
+            />
+            <div className="Stats_Charts">
+                <Statistics_Canvas data={LR_ChartData}/>
             </div>
         </div>
     )

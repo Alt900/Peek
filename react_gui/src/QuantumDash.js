@@ -1,5 +1,5 @@
-import React, { useReducer, useState } from "react";
-import { Object_Reducer, FetchRoute, StateObject_Handler } from "./utils";
+import React, {useContext, useState} from "react";
+import { FetchRoute, StateObject_Handler } from "./utils";
 import CircuitSrc from './Graphs/Quantum_Circuit.png';
 
 const DYN_IMG = () => {
@@ -12,59 +12,152 @@ const DYN_IMG = () => {
     )
 }
 
-function QuantumDash(){
-
-    const [ShowPopup, setShowPopup] = useState(false);
-
-    const [Iterative_Args,Set_Iterative_Args] = useState({
-        epsilon_target:0.01,
-        alpha:0.05
-    })
-
-    const [Maximum_Args,Set_Maximum_Args] = useState({
-        evaluation_schedule:3
-    })
-
-    const [Faster_Args,Set_Faster_Args] = useState({
-        delta:0.01,
-        maxiter:3
-    })
-
-    const Quantum_Object = {
-        OPENQASM_Script: "OPENQASM 2.0;\ninclude 'qelib1.inc';\nqreg q[4];\ncreg c[4];",
-        QASM_Result: "",
-        QAE_Type: "Canonical",
-        QAE_Qubits: 2,
-        QAE_Probability: 0.2,
-        QAE_Args: []
-    }
-
-    const HandleFormChange = (event,Dispatcher) => {
-        const {name,value} = event.target;
-        Dispatcher((PrevState)=>({
-            ...PrevState,
-            [name]:value
-        }));
-    };
-
-    const HandleFormSubmit = (event,key) => {
-        event.preventDefault();
-        setShowPopup(false);
-        FetchRoute(Quantum_Router,Set_QuantumState,key,"QASM_Result")
-    }
-
-    const [Quantum_State,Set_QuantumState] = useReducer(Object_Reducer,Quantum_Object);
+function QuantumDash({state,dispatcher,QAE_Params,SetQAE_Params,FIP_Params,SetFIP_Params,Grovers_Params,SetGrovers_Params}){
+    let column = 0;
+    let row = -1;
 
     const Quantum_Router = {
-        "QASM_Result":`https:///127.0.0.1:5000/Run_QASM?Script=${Quantum_State.OPENQASM_Script}`,
-        "Grovers":`https://127.0.0.1:5000/Run_Grovers`,
-        "QAE":`https://127.0.0.1:5000/RunQAE?type=${Quantum_State.QAE_Type}
-            &Qubits=${Quantum_State.QAE_Qubits}
-            &Probability=${Quantum_State.QAE_Probability}
-            &Args=${Quantum_State.QAE_Args}
-        `
+        "QASM_Result":`https:///127.0.0.1:5000/Run_QASM?Script=${state.OPENQASM_Script}`,
+        "Grovers":`https://127.0.0.1:5000/Grovers?qubits=${Grovers_Params.qubits}`,
+        "Quantum_Amplitude_Estimation": `https:127.0.0.1:5000/QAE?qubits=${QAE_Params.qubits}&probability=${QAE_Params.probability}&typeof=${QAE_Params.qae_type}`,
+        "Fixed_Income_Pricing": `https://127.0.0.1:5000/FIP?high=${FIP_Params.high_bounds}&low=${FIP_Params.low_bounds}&cf=${FIP_Params.cashflow}&epsilon=${FIP_Params.epsilon}&alpha=${FIP_Params.alpha}`
     }
 
+    const [FormKey,SetFormKey] = useState(null);
+    const [FormOpen,SetFormOpen] = useState(false);
+
+    const [offset,setoffset] = useState({x:0,y:0})
+    const [isdragging,setisdragging] = useState(false);
+    const [position, setposition] = useState({x:0,y:0});
+
+    const HandleMouseDown = (event) => {
+        setisdragging(true);
+        setoffset({x:event.clientX-position.x,y:event.clientY-position.y,});
+    };
+
+    const HandleMouseMove = (event) =>{
+        if(isdragging){
+            setposition({x:event.clientX-offset.x,y:event.clientY-offset.y});
+        }
+    };
+
+    const HandleMouseUp = () => {
+        setisdragging(false);
+    };
+
+    const DispatchQuantumForm = () => {
+        switch(FormKey){
+            case "Quantum_Amplitude_Estimation":
+                if(FormOpen){
+                    return(
+                        <div>
+                            <div className="Form" onMouseDown={HandleMouseDown} onMouseMove={HandleMouseMove} onMouseUp={HandleMouseUp} style={{left:`${position.x}px`,top:`${position.y}px`,cursor: isdragging ? 'grabbing' : 'grab',}}>
+                                <button className="CloseForm" onClick={()=>{SetFormOpen(false)}}>X</button>
+                                <h2 style={{fontSize:"15px"}}>
+                                    Quantum Amplitude Estimation Parameters
+                                </h2>
+                                {
+                                    Object.keys(QAE_Params).map((key,_)=>{
+                                        return(
+                                            <>
+                                            <label>{key.replaceAll("_"," ")}</label>
+                                            <br/>
+                                            <input
+                                                className="FormInput"
+                                                name={key}
+                                                value={QAE_Params[key]}
+                                                placeholder={QAE_Params[key]}
+                                                onChange={(event)=>StateObject_Handler({key:key,target:event.target},SetQAE_Params)}
+                                            ></input>
+                                            <br/>
+                                            <br/>
+                                            </>
+                                        );
+                                    })
+                                }
+                                <br/>
+                                <button
+                                    className="FormButton"
+                                    onClick={()=>{FetchRoute(Quantum_Router,dispatcher,"Quantum_Amplitude_Estimation","QASM_Result")}}
+                                >Run QAE</button>
+                            </div>
+                        </div>
+                    );
+                }
+            case "Fixed_Income_Pricing":
+                if(FormOpen){
+                    return(
+                        <div>
+                            <div className="Form" onMouseDown={HandleMouseDown} onMouseMove={HandleMouseMove} onMouseUp={HandleMouseUp} style={{left:`${position.x}px`,top:`${position.y}px`,cursor: isdragging ? 'grabbing' : 'grab',}}>
+                                <button className="CloseForm" onClick={()=>{SetFormOpen(false)}}>X</button>
+                                <h2 style={{fontSize:"15px"}}>
+                                    Fixed Income Pricing Parameters
+                                </h2>
+                                {
+                                    Object.keys(FIP_Params).map((key,_)=>{
+                                        return(
+                                            <>
+                                            <label>{key.replaceAll("_"," ")}</label>
+                                            <br/>
+                                            <input
+                                                className="FormInput"
+                                                name={key}
+                                                value={FIP_Params[key]}
+                                                placeholder={FIP_Params[key]}
+                                                onChange={(event)=>StateObject_Handler({key:key,target:event.target},SetFIP_Params)}
+                                            ></input>
+                                            <br/>
+                                            <br/>
+                                            </>
+                                        );
+                                    })
+                                }
+                                <button
+                                    className="FormButton"
+                                    onClick={()=>{FetchRoute(Quantum_Router,dispatcher,"Fixed_Income_Pricing","QASM_Result")}}
+                                >Run FIP</button>
+                            </div>
+                        </div>
+                    );
+                }
+            default:
+                if(FormOpen){
+                    return(
+                        <div>
+                            <div className="Form" onMouseDown={HandleMouseDown} onMouseMove={HandleMouseMove} onMouseUp={HandleMouseUp} style={{left:`${position.x}px`,top:`${position.y}px`,cursor: isdragging ? 'grabbing' : 'grab',}}>
+                                <button className="CloseForm" onClick={()=>{SetFormOpen(false)}}>X</button>
+                                <h2 style={{fontSize:"15px"}}>
+                                    Grovers Algorithm Parameters
+                                </h2>
+                                {
+                                    Object.keys(Grovers_Params).map((key,_)=>{
+                                        return(
+                                            <>
+                                            <label>{key.replaceAll("_"," ")}</label>
+                                            <br/>
+                                            <input
+                                                className="FormInput"
+                                                name={key}
+                                                value={Grovers_Params[key]}
+                                                placeholder={Grovers_Params[key]}
+                                                onChange={(event)=>StateObject_Handler({key:key,target:event.target},SetGrovers_Params)}
+                                            ></input>
+                                            <br/>
+                                            <br/>
+                                            </>
+                                        );
+                                    })
+                                }
+                                <button
+                                    className="FormButton"
+                                    onClick={()=>{FetchRoute(Quantum_Router,dispatcher,"Grovers","QASM_Result")}}
+                                >Run Grovers</button>
+                            </div>
+                        </div>
+                    )
+                }
+        }
+    }
 
     return(
         <>
@@ -77,111 +170,58 @@ function QuantumDash(){
                     (event)=>{
                         StateObject_Handler(
                             {key:"OPENQASM_Script",target:event.target},
-                            Set_QuantumState
+                            dispatcher
                         )}
                     }
-                value={Quantum_State.OPENQASM_Script}
+                value={state.OPENQASM_Script}
                 >
                 </textarea>
                 <button
                 className="Run_QASM"
                 onClick={
                     ()=>{
-                        FetchRoute(Quantum_Router,Set_QuantumState,"QASM_Result","QASM_Result");
-                        console.log(Quantum_State.QASM_Result)
+                        FetchRoute(Quantum_Router,dispatcher,"QASM_Result","QASM_Result");
+                        console.log(state.QASM_Result)
                     }
                 }
                 >Run QASM Script</button>
+                {console.log(state.QASM_Result)}
                 <textarea
                 className="QASM_Result"
                 name="QASM_Result"
                 value={
-                    Quantum_State.QASM_Result===""?
+                    state.QASM_Result===""?
                     "No QASM script has been ran yet":
-                    `${Object.keys(Quantum_State.QASM_Result)}\n${"_ _ _ ".repeat(Object.keys(Quantum_State.QASM_Result).length)}\n\n${Object.values(Quantum_State.QASM_Result)}`
+                    `${Object.keys(state.QASM_Result)}\n${"_ _ _ ".repeat(Object.keys(state.QASM_Result).length)}\n\n${Object.values(state.QASM_Result)}`
                 }
                 />
             </div>
             <div className="Circuit_Display">
+                {DispatchQuantumForm()}
                 <DYN_IMG/>
-            </div>
-            <div className="Quantum_Buttons">
-                {
-                    [
-                        "Canonical_QAE",
-                        "Iterative_QAE",
-                        "Maximum_QAE",
-                        "Faster_QAE",
-                        "Grovers"
-                    ].map((key,index)=>{
-                        <button 
-                        key={index}
-                        onClick={()=>{
-                            setShowPopup(true)
-                        }}
-                        >{key.replaceAll("_"," ")}</button>
-                        {ShowPopup && (
-                            <div className="QuantumArgsContainer">
-                                <form onSubmit={HandleFormSubmit}>
-                                    {()=>{
-                                        switch(key){
-                                            case "Iterative_QAE":
-                                            Iterative_Args.keys().map((subkey,_)=>(
-                                                <>
-                                                    <label>subkey
-                                                    </label>
-                                                    <input
-                                                        type="number"
-                                                        name={subkey}
-                                                        value={Iterative_Args[subkey]}
-                                                        onChange={(event)=>{HandleFormChange(event,Set_Iterative_Args)}}
-                                                    />
-                                                    <br/>
-                                                </>
-                                            ))
-                                            case "Maximum_QAE":
-                                            Maximum_Args.keys().map((subkey,_)=>{
-                                                <>
-                                                    <label>subkey</label>
-                                                    <input
-                                                        type="number"
-                                                        value={Maximum_Args[subkey]}
-                                                        onChange={(event)=>{HandleFormChange(event,Set_Maximum_Args)}}
-                                                    />
-                                                    <br/>
-                                                </>
-                                            })
-                                            case "Faster_QAE":
-                                            Faster_Args.keys().map((subkey,_)=>{
-                                                <>
-                                                    <label>subkey</label>
-                                                    <input
-                                                        type="number"
-                                                        value={Faster_Args[subkey]}
-                                                        onChange={(event)=>{HandleFormChange(event,Set_Faster_Args)}}
-                                                    />
-                                                    <br/>
-                                                </>
-                                            })
-                                            default://Canonical_QAE
-                                            <>
-                                            </>
-                                        }
-                                    }}
-                                </form>    
-                            </div>
-                        )}
-                    })
-                }
-            </div>
-            <button
-                className="Grovers_Algorithm"
-                onClick={
-                    ()=>{
-                        FetchRoute(Quantum_Router,Set_QuantumState,"Grovers_Result","QASM_Result")
+                <div className="QA_Container">
+                    {
+                        [
+                            "Grovers",
+                            "Quantum_Amplitude_Estimation",
+                            "Fixed_Income_Pricing"
+                        ].map((key,index)=>{
+                            if(index%2===0 && index!==0){
+                                column+=1
+                                row=-1
+                            }
+                            row+=1;
+                            return(
+                                <button
+                                className="QA_Button"
+                                onClick={()=>{SetFormKey(key);SetFormOpen(true);}}
+                                style={{left:`${row*16}%`,top:`${column*30}%`}}//onclick={render form with parameters and a submit button, the submit button will execute a route and fill the dispatcher on pythons end with the provided map key}
+                                >{key.replaceAll("_"," ")}</button>
+                            )
+                        })
                     }
-                }
-            >Run Grovers algorithm</button>
+                </div>
+            </div>
         </>
     );
 };

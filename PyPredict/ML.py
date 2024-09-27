@@ -1,5 +1,5 @@
 from .API_Interface import args,filesystem
-from . import torch,os,np,pd,ctypes,args
+from . import torch,os,np,pd,args
 
 import statsmodels
 from datetime import datetime as dt
@@ -47,41 +47,37 @@ class LSTM_Prep():
         return result
 
     def window(self,SplitSet):
-        lib = ctypes.CDLL("./lib/DataHandling.dll")
-        lib.windowsize=window_size
-        Recompiled_Matrices=[]
-        Recompiled_Labels=[]
-        for Set in SplitSet:
-            temp_matrix = []
-            temp_labels = []
+        TFTTV=[]
+        for x in range(3):
+            size=len(SplitSet[x])
+            indexes=[]
+            labels=[]
+            initial_rows=int((size-window_size)/self.time_shift)
+            indexes = [y for y in range(0,size,self.time_shift)]
 
-            lib.Array = np.array(Set).ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-            lib.size = len(Set)
-            lib.Windowsize=window_size
-            lib.Row=round(lib.size/window_size)
+            indexes=indexes[0:initial_rows]
+            matrix=np.zeros((len(indexes)-1,window_size))
 
-            Window_Generator = lib.Generate_Window_Matrix
-            Labels_Generator = lib.Generate_Window_Labels
+            for y in range(len(indexes)):
+                try:
+                    labels.append([SplitSet[x][indexes[y]+window_size+self.label_size]])
+                    matrix[y]=SplitSet[x][indexes[y]:indexes[y]+window_size]
+                except IndexError:
+                    pass
 
-            Window_Generator.restype=ctypes.POINTER(ctypes.POINTER(ctypes.c_double))
-            Labels_Generator.restype=ctypes.POINTER(ctypes.c_double)
+            TFTTV.append([matrix[:,:,np.newaxis],np.array(labels)[:,np.newaxis]])
 
-            Windowed_Matrix = Window_Generator()
-            Windowed_Labels = Labels_Generator()
-
-            for i in range(lib.Row):
-                temp_matrix.append(
-                    [Windowed_Matrix[i][j] for j in range(window_size)]
-                )
-                temp_labels.append(
-                    Windowed_Labels[i]
-                )
-                print(Windowed_Matrix[i][0:4])
-
-            Recompiled_Matrices.append(temp_matrix)
-            Recompiled_Labels.append(temp_labels)
-        lib.FreeAll()
-        return (Recompiled_Matrices,Recompiled_Labels)
+        self.TTV_x=[
+            TFTTV[0][0].astype(np.float32),
+            TFTTV[1][0].astype(np.float32),
+            TFTTV[2][0].astype(np.float32)
+        ]
+        self.TTV_y=[
+            TFTTV[0][1].astype(np.float32),
+            TFTTV[1][1].astype(np.float32),
+            TFTTV[2][0].astype(np.float32)
+            ]
+        return(self.TTV_x,self.TTV_y)
 
 class Feature_Engineering():
     def __init__(self,
@@ -159,9 +155,9 @@ class LSTM():
         self.filename=filename
 
         self.model = LSTM_Model(cell_count=cell_count, output_size=output_size, layers=layers, MTO=MTO, Multivariate=Multivariate, variable_count=variable_count)
-        if args["ML"][0]["load_model"]:
-            self.model.load_state_dict(torch.load(f"{os.getcwd()}{filesystem}Assets{filesystem}Models{filesystem}{filename}.pt"))
-            self.model.eval()
+        #if args["ML"][0]["load_model"]:
+        #    self.model.load_state_dict(torch.load(f"{os.getcwd()}{filesystem}Assets{filesystem}Models{filesystem}{filename}.pt"))
+        #    self.model.eval()
 
         self.optimizer = torch.optim.Adam(self.model.parameters())
         self.LossFunction = torch.nn.MSELoss()
@@ -171,7 +167,7 @@ class LSTM():
 
         self.TrainingLoader = torch.utils.data.DataLoader(
             torch.utils.data.TensorDataset(self.train_x,self.train_y),
-            batch_size=args["ML"][0]["batch_size"],
+            batch_size=args["Batch_Size"],
             shuffle=True
         )
 
@@ -200,8 +196,8 @@ class LSTM():
 
             print(f"epoch - {epoch}\nTrain RMSE: {train_rmse}\nTest RMSE: {test_rmse}")
 
-        if args["ML"][0]["save_model"]:
-            torch.save(self.model.state_dict(),f"{os.getcwd()}{filesystem}Assets{filesystem}Models{filesystem}{self.filename}")
+        #if args["ML"][0]["save_model"]:
+            #torch.save(self.model.state_dict(),f"{os.getcwd()}{filesystem}Assets{filesystem}Models{filesystem}{self.filename}")
 
     def predict(self,x):
         predicted=self.model(torch.tensor(x))
