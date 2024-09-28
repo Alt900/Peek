@@ -1,4 +1,4 @@
-from . import os, plt, np, args
+from . import os, plt, np, args, filesystem
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit, AncillaRegister, Aer, execute, transpile
 
 #Quantum Amplitude Estimator
@@ -52,7 +52,7 @@ def RunCircuit(Circuit,Generate_Graph=False,From_QASM=False,QASM=None):
     if Generate_Graph:
         plt.figure(figsize=(7,7))
         Circuit.draw(output='mpl')
-        plt.savefig(os.getcwd()+"\\react_gui\\src\\Graphs\\Quantum_Circuit.png",transparent=True)
+        plt.savefig(os.getcwd()+f"{filesystem}react_gui{filesystem}src{filesystem}Graphs{filesystem}Quantum_Circuit.png",transparent=True)
     return execute(Circuit,backend=Simulator).result().get_counts()
     
 class Grovers_Algorithm():
@@ -88,7 +88,7 @@ class Grovers_Algorithm():
         self.Circuit.h(self.Qreg)
         self.Circuit.measure_all()
         self.Circuit.draw(output='mpl')
-        plt.savefig(os.getcwd()+"\\react_gui\\src\\Graphs\\Quantum_Circuit.png",transparent=True)
+        plt.savefig(os.getcwd()+f"{filesystem}react_gui{filesystem}src{filesystem}Graphs{filesystem}Quantum_Circuit.png",transparent=True)
         return execute(self.Circuit,backend=Simulator).result().get_counts()
     
 
@@ -113,7 +113,7 @@ class QAE():
         results = AE_Results.estimation
         circuit_construct = AE.construct_circuit(problem)
         transpile(circuit_construct).draw(output='mpl')
-        plt.savefig(os.getcwd()+"\\react_gui\\src\\Graphs\\Quantum_Circuit.png",transparent=True)
+        plt.savefig(os.getcwd()+f"{filesystem}react_gui{filesystem}src{filesystem}Graphs{filesystem}Quantum_Circuit.png",transparent=True)
         return results
     
 class Fixed_Income_Pricing():
@@ -148,7 +148,7 @@ class Fixed_Income_Pricing():
         plt.xlabel("$r_1$ (%)", size=15)
         plt.ylabel("$r_2$ (%)", size=15)
         plt.colorbar()
-        plt.savefig(os.getcwd()+"\\react_gui\\src\\Graphs\\Probability_Density.png",transparent=True)
+        plt.savefig(os.getcwd()+f"{filesystem}react_gui{filesystem}src{filesystem}Graphs{filesystem}Probability_Density.png",transparent=True)
 
     def Generate_CF_Bars(self):
         self.cf = [1.0,2.0]
@@ -159,7 +159,7 @@ class Fixed_Income_Pricing():
         plt.grid()
         plt.xlabel("periods", size=15)
         plt.ylabel("cashflow ($)", size=15)
-        plt.savefig(os.getcwd()+"\\react_gui\\src\\Graphs\\Cash_Flow.png",transparent=True)
+        plt.savefig(os.getcwd()+f"{filesystem}react_gui{filesystem}src{filesystem}Graphs{filesystem}Cash_Flow.png",transparent=True)
 
     def Call(self):
         cnt = 0
@@ -182,7 +182,7 @@ class Fixed_Income_Pricing():
             uncertainty_model=self.u
         )
         fixed_income._objective.draw("mpl")
-        plt.savefig(os.getcwd()+"\\react_gui\\src\\Graphs\\Fixed_Income_Circuit.png",transparent=True)
+        plt.savefig(os.getcwd+f"{filesystem}react_gui{filesystem}src{filesystem}Graphs{filesystem}Quantum_Circuit.png",transparent=True)
 
         problem=fixed_income.to_estimation_problem()
 
