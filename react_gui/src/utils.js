@@ -62,8 +62,8 @@ export const StateObject_Handler = (newstate,Disbatcher,SpecialCase=null) => {
 export const Statistics_Canvas = ({data,width=941,height=366})=>{
     const StatsCanvasRef = useRef(null);
     useEffect(()=>{
-        if (data===undefined || data.name==='No data loaded'){
-            return(<></>)
+        if (data==="No data loaded"){
+            return <></>
         }
         const canvas = StatsCanvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -118,8 +118,8 @@ export const Statistics_Canvas = ({data,width=941,height=366})=>{
             const x = padding+(Math.max(MIN_X,Math.min(index,MAX_X))-MIN_X)*scaleX;
             ctx.strokeStyle="transparent";
             ctx.beginPath();
-            ctx.moveTo(x,index);
-            ctx.lineTo(x,index);
+            ctx.moveTo(x,item);
+            ctx.lineTo(x,item);
             ctx.stroke();
         })
 
@@ -157,7 +157,7 @@ export const Statistics_Canvas = ({data,width=941,height=366})=>{
 export const Machine_Learning_Canvas = ({data,prediction,width=941,height=366})=>{
     const StatsCanvasRef = useRef(null);
     useEffect(()=>{
-        if (data===undefined || data.name==='No data loaded'){
+        if (data===undefined || data==='No LSTM has been ran yet.'){
             return(<></>)
         }
         const canvas = StatsCanvasRef.current;

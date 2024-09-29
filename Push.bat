@@ -1,3 +1,3 @@
 git add .
-git commit -m "Added UNIX support to QuantumManager.py"
+git commit -m "Uploaded jupyter notebook 'Writing C for Python'"
 git push origin main

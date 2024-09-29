@@ -1,6 +1,6 @@
 import React from "react";
 import Dropdown from 'react-dropdown';
-import { FetchRoute, StateObject_Handler } from "./utils";
+import { FetchRoute, StateObject_Handler, Machine_Learning_Canvas } from "./utils";
 
 const MLDash = ({state,dispatcher})=>{
 
@@ -30,12 +30,7 @@ const MLDash = ({state,dispatcher})=>{
 
     return(
         <div>
-            <textarea
-            className="LSTM_Prediction"
-            value={
-                state.LSTM_Result==="No LSTM has been ran yet."? state.LSTM_Result : state.LSTM_Result.join('\n')
-            }
-            />
+            <div className="LSTM_Prediction"><Machine_Learning_Canvas data={state.LSTM_Result}/></div>
             <div className="ML_Operations">
                 <button 
                     className="MLOpButtons" 
