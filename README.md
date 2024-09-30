@@ -43,15 +43,15 @@ Since the API is built out of Flask and is hosted on another port in localhost, 
 ### Python:
 #### (Torches actual version is 2.2.2+cu118)
 ```
-pip3 install Torch 2.2.2`
-pip3 install statsmodels 0.14.0
-pip3 install numpy 1.24.3
-pip3 install pandas 1.5.3
-pip3 install matplotlib 3.7.1
-pip3 install qiskit 0.45.0
-pip3 install qiskit_algorithms 0.3.0
-pip3 install qiskit_finance 0.4.1
-pip3 install alpaca 0.8.2
+pip3 install Torch==2.2.2
+pip3 install statsmodels==0.14.0
+pip3 install numpy==1.24.3
+pip3 install pandas==1.5.3
+pip3 install matplotlib==3.7.1
+pip3 install qiskit==0.45.0
+pip3 install qiskit_algorithms==0.3.0
+pip3 install qiskit_finance==0.4.1
+pip3 install alpaca==0.8.2
 ```
 ### Node:
 ```

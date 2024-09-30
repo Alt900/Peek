@@ -1,3 +1,3 @@
 git add .
-git commit -m "Updated jupyter notebook 'Writing C for Python'"
+git commit -m "Documentation update"
 git push origin main
