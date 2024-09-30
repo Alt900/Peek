@@ -1,6 +1,6 @@
 import React from "react";
 import Dropdown from 'react-dropdown';
-import { FetchRoute, StateObject_Handler, Machine_Learning_Canvas } from "./utils";
+import { FetchRoute, StateObject_Handler } from "./utils";
 
 const MLDash = ({state,dispatcher})=>{
 
@@ -27,10 +27,10 @@ const MLDash = ({state,dispatcher})=>{
         "Train_Univar": `https://127.0.0.1:5000/Train_Univar?NormMethod=${state.ChosenNormal}&ticker=${state.Targeted_Ticker}&variable=${state.Targeted_Variable}`,
 
     }
-
+    //<Machine_Learning_Canvas data={}/>
     return(
         <div>
-            <div className="LSTM_Prediction"><Machine_Learning_Canvas data={state.LSTM_Result}/></div>
+            <textarea placeholder={state.LSTM_Result} className="LSTM_Textarea"/>
             <div className="ML_Operations">
                 <button 
                     className="MLOpButtons" 
