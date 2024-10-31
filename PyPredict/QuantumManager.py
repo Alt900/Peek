@@ -1,4 +1,4 @@
-from . import os, plt, np, args, filesystem
+from . import os, plt, np, filesystem
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit, AncillaRegister, Aer, execute, transpile
 
 #Quantum Amplitude Estimator
@@ -18,10 +18,6 @@ from qiskit_finance.applications.estimation import FixedIncomePricing
 Simulator = Aer.get_backend('qasm_simulator')
 sampler = Sampler()
 basis_gates = ["h", "ry", "cry", "cx", "ccx", "p", "cp", "x", "s", "sdg", "y", "t", "cz"]
-
-if args["3D_Render_Engine"]=="Blender":
-    import bpy
-    import bmesh
 
 class BernoulliA(QuantumCircuit):
     def __init__(self,probability):

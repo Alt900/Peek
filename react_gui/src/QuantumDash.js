@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useState} from "react";
 import { FetchRoute, StateObject_Handler } from "./utils";
 import CircuitSrc from './Graphs/Quantum_Circuit.png';
 
@@ -17,10 +17,10 @@ function QuantumDash({state,dispatcher,QAE_Params,SetQAE_Params,FIP_Params,SetFI
     let row = -1;
 
     const Quantum_Router = {
-        "QASM_Result":`https:///127.0.0.1:5000/Run_QASM?Script=${state.OPENQASM_Script}`,
-        "Grovers":`https://127.0.0.1:5000/Grovers?qubits=${Grovers_Params.qubits}`,
-        "Quantum_Amplitude_Estimation": `https:127.0.0.1:5000/QAE?qubits=${QAE_Params.qubits}&probability=${QAE_Params.probability}&typeof=${QAE_Params.qae_type}`,
-        "Fixed_Income_Pricing": `https://127.0.0.1:5000/FIP?high=${FIP_Params.high_bounds}&low=${FIP_Params.low_bounds}&cf=${FIP_Params.cashflow}&epsilon=${FIP_Params.epsilon}&alpha=${FIP_Params.alpha}`
+        "QASM_Result":`/Run_QASM?Script=${state.OPENQASM_Script}`,
+        "Grovers":`/Grovers?qubits=${Grovers_Params.qubits}`,
+        "Quantum_Amplitude_Estimation": `/QAE?qubits=${QAE_Params.qubits}&probability=${QAE_Params.probability}&typeof=${QAE_Params.qae_type}`,
+        "Fixed_Income_Pricing": `/FIP?high=${FIP_Params.high_bounds}&low=${FIP_Params.low_bounds}&cf=${FIP_Params.cashflow}&epsilon=${FIP_Params.epsilon}&alpha=${FIP_Params.alpha}`
     }
 
     const [FormKey,SetFormKey] = useState(null);
@@ -78,7 +78,7 @@ function QuantumDash({state,dispatcher,QAE_Params,SetQAE_Params,FIP_Params,SetFI
                                 <br/>
                                 <button
                                     className="FormButton"
-                                    onClick={()=>{FetchRoute(Quantum_Router,dispatcher,"Quantum_Amplitude_Estimation","QASM_Result")}}
+                                    onClick={()=>{FetchRoute(dispatcher,Quantum_Router["Quantum_Amplitude_Estimation"],"QASM_Result")}}
                                 >Run QAE</button>
                             </div>
                         </div>
@@ -114,7 +114,7 @@ function QuantumDash({state,dispatcher,QAE_Params,SetQAE_Params,FIP_Params,SetFI
                                 }
                                 <button
                                     className="FormButton"
-                                    onClick={()=>{FetchRoute(Quantum_Router,dispatcher,"Fixed_Income_Pricing","QASM_Result")}}
+                                    onClick={()=>{FetchRoute(dispatcher,Quantum_Router["Fixed_Income_Pricing"],"QASM_Result")}}
                                 >Run FIP</button>
                             </div>
                         </div>
@@ -150,7 +150,7 @@ function QuantumDash({state,dispatcher,QAE_Params,SetQAE_Params,FIP_Params,SetFI
                                 }
                                 <button
                                     className="FormButton"
-                                    onClick={()=>{FetchRoute(Quantum_Router,dispatcher,"Grovers","QASM_Result")}}
+                                    onClick={()=>{FetchRoute(dispatcher,Quantum_Router["Grovers"],"QASM_Result")}}
                                 >Run Grovers</button>
                             </div>
                         </div>
@@ -180,7 +180,7 @@ function QuantumDash({state,dispatcher,QAE_Params,SetQAE_Params,FIP_Params,SetFI
                 className="Run_QASM"
                 onClick={
                     ()=>{
-                        FetchRoute(Quantum_Router,dispatcher,"QASM_Result","QASM_Result");
+                        FetchRoute(dispatcher,Quantum_Router["QASM_Result"],"QASM_Result");
                         console.log(state.QASM_Result)
                     }
                 }

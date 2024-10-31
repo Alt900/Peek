@@ -1,5 +1,6 @@
 {
   "name": "react_gui",
+  "proxy":"http://127.0.0.1:5000",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -7,11 +8,8 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "react": "^18.3.1",
-    "react-calendar": "^5.0.0",
     "react-dom": "^18.3.1",
-    "react-dropdown": "^1.11.0",
     "react-scripts": "5.0.1",
-    "recharts": "^2.12.7",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

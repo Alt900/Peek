@@ -1,25 +1,28 @@
-import React, { useEffect, useState } from "react";
-import Dropdown from 'react-dropdown';
-import { StateObject_Handler, FetchRoute, Statistics_Canvas } from "./utils";
+import React, { useState } from "react";
+import { StateObject_Handler, FetchRoute, Dropdown } from "./utils";
 
 function StatisticsDash({state,dispatcher,ArimaParams,SetArimaParams,ThetaParams,SetThetaParams,OLSParams,SetOLSParams,Metrics_Checked,SetMetrics_Checked,ClassicParams,SetClassicParams,Statistics_State,Set_StatisticsState,MetricsCache,SetMetricsCache}){
     let column = 1;
     let row = 0;
 
+    const Operations = ["Linear Regression"];
+
     const [FormOpen,SetFormOpen] = useState(false);
 
     const [FormKey,SetFormKey] = useState(null);
+
+    const [Selected_Operations,SetSelected_Operations] = useState(Operations[0])
 
     const [LR_ChartData, Set_LR_ChartData] = useState([{ name: 'No data loaded'}]);
 
     const [LR_Summary,Set_LR_Summary] = useState("No Linear Regression Model has been ran yet.")
 
     const Statistics_Router = {
-        "Run_ARIMA": `https://127.0.0.1:5000/Run_ARIMA?order=${ArimaParams.order}&seasonal_order=${ArimaParams.seasonal_order}&trend=${ArimaParams.trend}&enforce_stationarity=${ArimaParams.enforce_stationarity}&enforce_invertibility=${ArimaParams.enforce_invertibility}&concentrate_scale=${ArimaParams.concentrate_scale}&trend_offset=${ArimaParams.trend_offset}&validate_specification=${ArimaParams.validate_specification}&missing=${ArimaParams.missing}&frequency=${ArimaParams.frequency}&ticker=${ArimaParams.ticker}&dependent=${ArimaParams.dependent}&independent=${ArimaParams.independent}`,
-        "Run_Theta":`https://127.0.0.1:5000/Run_Theta?period=${ThetaParams.period}&deseasonalize=${ThetaParams.deseasonalize}&use_test=${ThetaParams.use_test}&method=${ThetaParams.method}&difference=${ThetaParams.difference}&ticker=${ThetaParams.ticker}&dependent=${ThetaParams.dependent}&independent=${ThetaParams.independent}&toforecast=${ThetaParams.ForecastInterval}`,
-        "Run_OLS":`https://127.0.0.1:5000/Run_OLS?missing=${OLSParams.missing}&hasconst=${OLSParams.hasconst}&ticker=${OLSParams.ticker}&dependent=${OLSParams.dependent}&independent=${OLSParams.independent}`,
-        "Run_Classic":`https://127.0.0.1:5000/Run_ClassicLR?ticker=${ClassicParams.ticker}&dependent=${ClassicParams.dependent}&independent=${ClassicParams.independent}`,
-        //"GetMetric": (Method)=>{`https://127.0.0.1:5000/FetchMetric?${Method}&ticker=`}
+        "Run_ARIMA": `/Run_ARIMA?order=${ArimaParams.order}&seasonal_order=${ArimaParams.seasonal_order}&trend=${ArimaParams.trend}&enforce_stationarity=${ArimaParams.enforce_stationarity}&enforce_invertibility=${ArimaParams.enforce_invertibility}&concentrate_scale=${ArimaParams.concentrate_scale}&trend_offset=${ArimaParams.trend_offset}&validate_specification=${ArimaParams.validate_specification}&missing=${ArimaParams.missing}&frequency=${ArimaParams.frequency}&ticker=${ArimaParams.ticker}&dependent=${ArimaParams.dependent}&independent=${ArimaParams.independent}`,
+        "Run_Theta":`/Run_Theta?period=${ThetaParams.period}&deseasonalize=${ThetaParams.deseasonalize}&use_test=${ThetaParams.use_test}&method=${ThetaParams.method}&difference=${ThetaParams.difference}&ticker=${ThetaParams.ticker}&dependent=${ThetaParams.dependent}&independent=${ThetaParams.independent}&toforecast=${ThetaParams.ForecastInterval}`,
+        "Run_OLS":`/Run_OLS?missing=${OLSParams.missing}&hasconst=${OLSParams.hasconst}&ticker=${OLSParams.ticker}&dependent=${OLSParams.dependent}&independent=${OLSParams.independent}`,
+        "Run_Classic":`/Run_ClassicLR?ticker=${ClassicParams.ticker}&dependent=${ClassicParams.dependent}&independent=${ClassicParams.independent}`,
+        //"GetMetric": (Method)=>{`/FetchMetric?${Method}&ticker=`}
     }
 
     //dragging handlers
@@ -90,7 +93,7 @@ function StatisticsDash({state,dispatcher,ArimaParams,SetArimaParams,ThetaParams
                                 <br/>
                                 <button
                                     className="FormButton"
-                                    onClick={()=>{FetchRoute(Statistics_Router,Set_StatisticsState,"Run_ARIMA","LR_Results")}}
+                                    onClick={()=>{FetchRoute(Set_StatisticsState,Statistics_Router["Run_ARIMA"],"LR_Results")}}
                                 >Run ARIMA</button>
                             </div>
                         </div>
@@ -127,7 +130,7 @@ function StatisticsDash({state,dispatcher,ArimaParams,SetArimaParams,ThetaParams
                                 <br/>
                                 <button
                                     className="FormButton"
-                                    onClick={()=>{FetchRoute(Statistics_Router,Set_StatisticsState,"Run_Theta","LR_Results")}}
+                                    onClick={()=>{FetchRoute(Set_StatisticsState,Statistics_Router["Run_Theta"],"LR_Results")}}
                                 >Run Theta</button>
                             </div>
                         </div>
@@ -164,7 +167,7 @@ function StatisticsDash({state,dispatcher,ArimaParams,SetArimaParams,ThetaParams
                                 <br/>
                                 <button
                                     className="FormButton"
-                                    onClick={()=>{FetchRoute(Statistics_Router,Set_StatisticsState,"Run_OLS","LR_Results")}}
+                                    onClick={()=>{FetchRoute(Set_StatisticsState,Statistics_Router["Run_OLS"],"LR_Results")}}
                                 >Run OLS</button>
                             </div>
                         </div>
@@ -201,7 +204,7 @@ function StatisticsDash({state,dispatcher,ArimaParams,SetArimaParams,ThetaParams
                                 <br/>
                                 <button
                                     className="FormButton"
-                                    onClick={()=>{FetchRoute(Statistics_Router,Set_StatisticsState,"Run_Classic","LR_Results")}}
+                                    onClick={()=>{FetchRoute(Set_StatisticsState,Statistics_Router["Run_Classic"],"LR_Results")}}
                                 >Run Classic LR</button>
                             </div>
                         </div>
@@ -211,7 +214,7 @@ function StatisticsDash({state,dispatcher,ArimaParams,SetArimaParams,ThetaParams
     }
 
     const RenderOperations = () => {
-        switch(Statistics_State.Selected_Operations){
+        switch(Selected_Operations){
             case "Metrics":
                 return(
                     Object.keys(Metrics_Checked).map((key,index)=>{
@@ -232,7 +235,7 @@ function StatisticsDash({state,dispatcher,ArimaParams,SetArimaParams,ThetaParams
                                         );
                                         if(Metrics_Checked[key]===true){
                                             AddMetricToObject(key,FetchRoute(
-                                                Statistics_Router
+                                                Statistics_Router['some route']//uhhhh huh?
                                             ));
                                         } else {
                                             PopMetricFromObject(key);
@@ -273,17 +276,13 @@ function StatisticsDash({state,dispatcher,ArimaParams,SetArimaParams,ThetaParams
             {DispatchLRForm()}
             {console.log(document.getElementById("LRForm"))}
             <div className="Stats_Operations">
-                <Dropdown
-                    className="Operation_Selection"
-                    options={Statistics_State.Operations}
-                    onChange={
-                        (event)=>{
-                            StateObject_Handler({key:"Selected_Operations",target:event.value},Set_StatisticsState,"Dropdown")
-                        }
-                    }
-                    value={Statistics_State.Selected_Operations}
-                    placeholder={Statistics_State.Operations[0]}
-                />
+                <div style={{position:"absolute",left:"0",width:"50%",height:"5%"}}>
+                    <Dropdown
+                        Options={Operations}
+                        State={Selected_Operations}
+                        Dispatcher={SetSelected_Operations}
+                    />
+                </div>
                 {RenderOperations()}
             </div>
             <textarea
@@ -291,9 +290,6 @@ function StatisticsDash({state,dispatcher,ArimaParams,SetArimaParams,ThetaParams
             value={Statistics_State.LR_Results.replace(/\\n/g, '\n')}
             readOnly
             />
-            <div className="Stats_Charts">
-                <Statistics_Canvas data={LR_ChartData}/>
-            </div>
         </div>
     )
 };

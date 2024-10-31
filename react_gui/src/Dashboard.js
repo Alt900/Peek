@@ -6,6 +6,9 @@ import DownloadDash from "./DownloadDash";
 import QuantumDash from "./QuantumDash";
 
 import { Object_Reducer } from "./utils";
+let Today = new Date();
+let Current_Year = Today.getFullYear();
+let Current_Month = Today.getMonth();
 
 function Dashboard(){
 
@@ -143,8 +146,6 @@ function Dashboard(){
             "VWAP"
         ],
         P_Val: 0.5,
-        Operations: ["Linear Regression"],//metrics
-        Selected_Operations: "Linear Regression",
         LR_Results: "No statistical operations have been performed yet.",
     }
 
@@ -191,8 +192,13 @@ function Dashboard(){
         SelectedCalendar: "From",
         Tickers: ["LMT","NVDA"],
         Temp_Ticker: "",
-        Selected_DataFile: "LMT",
-        currently_rendered: "LMT",
+        Cached_JSON: [{ name: 'No data loaded'}],
+        StartYear: Current_Year,
+        StartMonth: Current_Month,
+        StartDay: 1,
+        EndYear: Current_Year,
+        EndMonth: Current_Month,
+        EndDay: 1
     }
 
     const [Download_State,Set_DownloadState] = useReducer(Object_Reducer,Download_Object);
@@ -200,7 +206,7 @@ function Dashboard(){
     function RenderDashboard(){
         switch(DashboardSelected) {
             case "ML":
-                return(<MLDash state={ML_State} dispatcher={Set_MLState}/>)
+                return(<MLDash state={ML_State} DataDispatcher={Set_DownloadState} Download_State={Download_State}/>)
             case "Statistics":
                 return(<StatisticsDash
                     state={Statistics_State}
