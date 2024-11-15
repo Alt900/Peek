@@ -98,12 +98,79 @@ def MovementAverage():
 
 @app.route("/CreateModel",methods=['GET'])
 def CreateModel():
-    Args = json.loads(request.args.get("Args"))
-    Layers = json.loads(request.args.get("Layers"))
-    Model_Obj = ML.Customized_Network(Layers,Args)
-    Model_Obj.Construct_Model()
+    Hyperparameters = json.loads(request.args.get("Hyperparams"))
+    Layer_Arguments = json.loads(request.args.get("LayerArgs"))
+    Norm_Method = request.args.get("NormMethod",type=str)
+    Ticker = request.args.get("Ticker",type=str)
+    Layers = [x for x in request.args.get("Layers",type=list) if x!=","]
+    BoolVars = [True if x[0]!="f" else False for x in request.args.get("Variables",type=str).split(",")]
+    Vars = ["open","high","low","close","volume"]
+    Variables = []
+    for x in range(5):
+        if BoolVars[x]:
+            Variables.append(Vars[x])
+    Model_Obj = ML.Customized_Network(Layer_Arguments,Layers,Variables)
+
+    TTV = (Hyperparameters[0]["value"],Hyperparameters[1]["value"],Hyperparameters[2]["value"])
+
+    copy = API_Interface.data[Ticker].copy()
+    to_export = json.loads(API_Interface.data[Ticker][Variables].copy().to_json(orient="records"))
+    Means,STDs,Min,Max=[],[],[],[]
+
+    if Norm_Method=="Z_Score":
+        for column in Variables:
+            listcol = list(copy[column].tolist())
+            Mean = CStats.Mean(listcol)
+            STD = CStats.STD(Mean,listcol)
+            Means.append(Mean)
+            STDs.append(STD)
+            copy[column] = normalization_dispatcher[Norm_Method](listcol,Mean,STD)
+    
+    elif Norm_Method=="MinMax":
+        for column in Variables:
+            listcol = list(copy[column].tolist())
+            tempmin = min(listcol)
+            tempmax = max(listcol)
+            Min.append(tempmin)
+            Max.append(tempmax)
+            copy[column] = normalization_dispatcher[Norm_Method](listcol,tempmin,tempmax)
+    
+    else:
+        for column in Variables:
+            copy[column] = normalization_dispatcher[Norm_Method](list(copy[column].tolist()))
+
+    MVR = ML.Window(copy,Variables,Hyperparameters[4]["value"])
+    MVR = ML.Split(MVR[0],MVR[1],TTV)
+
+    train_x, train_y = MVR[0]
+    test_x, test_y = MVR[1]
+    validation_x, validation_y = MVR[2]
+
+    Model = ML.Custom_Network_Model((train_x,test_x,validation_x),(train_y,test_y,validation_y),Hyperparameters[3]["value"],int(Hyperparameters[6]["value"]),5,Model_Obj)
+    Model.train()
+    Prediction = Model.predict(validation_x).tolist()
+    DeNormalizedPrediction = []
+    if Norm_Method=="Z_Score":
+        for x,i in zip(Prediction,range(len(Prediction))):
+            DeNormalizedPrediction.append(denormalization_dispatcher[Norm_Method](x,Means[i],STDs[i]))
+    
+    elif Norm_Method=="MinMax":
+        for x,i in zip(Prediction,range(len(Prediction))):
+            DeNormalizedPrediction.append(denormalization_dispatcher[Norm_Method](x,Min[i],Max[i]))
+    
+    else:
+        for x in Prediction:
+            DeNormalizedPrediction.append(denormalization_dispatcher[Norm_Method](x))
+
+    Payload={
+        "PreData":to_export,
+        "Prediction":DeNormalizedPrediction,
+        "Loss":{"Train_Loss":Model.Train_Loss,"Test_Loss":Model.Test_Loss},
+        "Accuracy": {"Train_Accuracy":Model.Train_Accuracy,"Test_Accuracy":Model.Test_Accuracy}
+    }
+
     return{
-        "payload":"created model..",
+        "payload":Payload,
         "error":None
     }
 

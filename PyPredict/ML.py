@@ -53,39 +53,121 @@ class Feature_Engineering():
 
 
 class Customized_Network(torch.nn.Module):
-    def __init__(self,Layers:dict,Args:dict):
+    def __init__(self,LayerArgs,Layers,Variables):
+        self.LayerArgs = LayerArgs
         self.Layers = Layers
-        self.Args = Args
-        super().__init__()
-
-        self.Layer_Dispatcher = {
-            "LSTM Unidirection": lambda Layer : torch.nn.LSTM(
-                len(self.Args[Layer]["Variables"]),
-                cell_count = self.Args[Layer]["cell_count"],
-                layers = self.Args[Layer]["layers"],
-                batch_first=self.Args[Layer]["Batch_First"]
-            ),
-            "LSTM Bidirectional": lambda Layer : torch.nn.LSTM(
-                len(self.Args[Layer]["Variables"]),
+        self.Variables = Variables
+        """
+        "1": lambda Layer : torch.nn.LSTM(
+                len(self.Variables),
+                int(self.LayerArgs[Layer][0]["content"]),
+                1,
+                batch_first=True,
                 bidirectional=True,
-                cell_count = self.Args[Layer]["cell_count"],
-                layers = self.Args[Layer]["layers"],
-                batch_first=self.Args[Layer]["Batch_First"]
             ),
-            "Dropout":lambda Layer : torch.nn.Dropout(p=self.Args[Layer]["p"]),
-            "Dense":lambda Layer: torch.nn.Linear(
-                cell_count = self.Args[Layer]["cell_count"],
-                output_size = self.Args[Layer]["output_size"]
-            )
+        """
+        super().__init__()
+        self.Layer_Dispatcher = {
+            "0": lambda Layer : torch.nn.LSTM(
+                len(self.Variables),
+                int(self.LayerArgs[Layer][0]["content"]),
+                1,
+                batch_first=True
+            ),
+            "1":lambda Layer : torch.nn.Dropout(p=float(self.LayerArgs[Layer][0]["content"])),
+            "2":lambda Layer: torch.nn.Linear(
+                int(self.LayerArgs[Layer][0]["content"]),
+                len(self.Variables)
+            ),
+            "3": lambda _ : torch.nn.Tanh(),
+            "4": lambda _ : torch.nn.ReLU(),
+            "5": lambda _ : torch.nn.LeakyReLU(),
+            "6": lambda _ : torch.nn.Sigmoid()
         }
 
         self.Model_Architecture = []
+        for Layer,N in zip(self.Layers,range(len(self.Layers))):
+            self.Model_Architecture.append(self.Layer_Dispatcher[Layer](N))
+        self.Model = torch.nn.Sequential(*self.Model_Architecture)
 
-    def Construct_Model(self):
-        for Layer in self.Layers:
-            self.Model_Architecture.append(self.Layer_Dispatcher[Layer])
-        self.Model = torch.nn.Sequential(self.Model_Architecture)
-        print(self.Model)
+    def forward(self,x):
+        out = x
+        lstm_states = []
+        for layer in self.Model_Architecture:
+            if isinstance(layer,torch.nn.LSTM):
+                out,h = layer(out)
+                lstm_states.append(h)
+            elif isinstance(layer,torch.nn.Linear):
+                batch_size, seq_length, feature_dim = out.shape
+                out = out.reshape(-1,feature_dim)
+                out = layer(out)
+                out = out.reshape(batch_size,seq_length,-1)
+            else:
+                out = layer(out)
+        return out[:,-1,:],lstm_states
+    
+class Custom_Network_Model():
+    def __init__(self,X,Y,batch_size,epochs,learning_rate,Model):
+        self.batch_size = batch_size
+        self.epochs = epochs
+        self.learning_rate = learning_rate
+        self.Model = Model
+        self.Train_Loss = []
+        self.Test_Loss = []
+        self.Train_Accuracy = []
+        self.Test_Accuracy = []
+
+        self.train_x, self.train_y = torch.from_numpy(X[0]), torch.from_numpy(Y[0])
+        self.test_x, self.test_y = torch.from_numpy(X[1]), torch.from_numpy(Y[1])
+
+        self.TrainingLoader = torch.utils.data.DataLoader(
+            torch.utils.data.TensorDataset(self.train_x,self.train_y),
+            batch_size=batch_size,
+            shuffle=True
+        )
+        self.TestingLoader = torch.utils.data.DataLoader(
+            torch.utils.data.TensorDataset(self.test_x,self.test_y),
+            batch_size=batch_size,
+            shuffle=True,
+            drop_last=True
+        )
+
+        self.Optimizer = torch.optim.Adam(self.Model.parameters(),lr=self.learning_rate)
+        self.LossFunction = torch.nn.MSELoss()
+
+    def train(self):
+        for epoch in range(self.epochs):
+            temptrain = None
+            for X_train, Y_train in self.TrainingLoader:
+                self.Optimizer.zero_grad()
+                outputs,_ = self.Model(X_train)
+                loss = self.LossFunction(outputs,Y_train)
+                if loss=="nan":
+                    print("Loss resulted in nan, something caused unstable gradients, stopping model traning.")
+                    exit()
+                loss.backward()
+                self.Optimizer.step()
+                temptrain = Y_train
+            self.Train_Loss.append(float(loss))
+            self.Train_Accuracy.append((torch.max(outputs,1==temptrain).sum().item())/temptrain.size(0))
+            temptest = None
+            for X_Test,Y_Test in self.TestingLoader:
+                outputs,_ = self.Model(X_Test)
+                loss = self.LossFunction(outputs,Y_Test)
+                if loss=="nan":
+                    print("Loss resulted in nan, something caused unstable gradients, stopping model traning.")
+                    exit()
+                loss.backward()
+                self.Optimizer.step()
+                temptest = Y_Test
+            self.Test_Loss.append(float(loss))
+            self.Test_Accuracy.append((torch.max(outputs,1==temptest).sum().item())/temptest.size(0))
+            print(f"epoch - {epoch}\nTraining loss: {self.Test_Loss[epoch]}\tTesting loss: {self.Test_Loss[epoch]}\n----------------------------------\nTraining accuracy: {self.Train_Accuracy[epoch]}\tTesting accuracy: {self.Test_Accuracy[epoch]}")
+
+    def predict(self,x):
+        predicted,_ = self.Model(torch.tensor(x))
+        predicted = predicted.detach().numpy().transpose()
+        return predicted
     
 class LSTM_Univariate_Model(torch.nn.Module):
     def __init__(self,cell_count,layers):
@@ -176,7 +258,7 @@ class LSTM_OHLC_Multivariate_Model(torch.nn.Module):
         Dense_state = self.Dense(LSTM_out)
         Dense_state = self.relu(Dense_state)
         return Dense_state[:,-1,:]
-    
+
 class LSTM_OHLC_Multivariate():
     def __init__(self,X,Y,cell_count=20,layers=1,batch_size=32,epochs=10,learning_rate=0.01):
         self.model = LSTM_OHLC_Multivariate_Model(cell_count=cell_count,layers=layers)

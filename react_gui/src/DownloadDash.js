@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FetchRoute, StateObject_Handler, CandleStickChart, Dropdown, FetchJSON } from "./utils";
+import { FetchRoute, StateObject_Handler, Dropdown, FetchJSON, CandleStickChart} from "./utils";
 
 let Today = new Date();
 let Current_Year = Today.getFullYear();
@@ -18,9 +18,14 @@ function DownloadDash({state,dispatcher}){
     const [StartDay,SetStartDay] = useState(1);
     const [EndDay,SetEndDay] = useState(1);
 
+    const [LevelController,SetLevelController] = useState(.8);
+    const [ZoomController,SetZoomController] = useState(1.0);
+    const [ScrollSensitivityController,SetScrollSensitivityController]= useState(1.5);
+
     const Data_Router = {
         "DownloadData":`/DownloadData?Tickers=${state.Tickers}&from=${StartYear}-${StartMonth}-${StartDay}&to=${EndYear}-${EndMonth}-${EndDay}`,
     }
+
 
     const [Start_Day_Options,SetStart_Day_Options] = useState(Array.from({length:new Date(StartYear,StartMonth,0).getDate()},(_,day)=>day+1));
     const [End_Day_Options,SetEnd_Day_Options] = useState(Array.from({length:new Date(StartYear,StartMonth,0).getDate()},(_,day)=>day+1));
@@ -32,7 +37,7 @@ function DownloadDash({state,dispatcher}){
     useEffect(()=>{
         SetEnd_Day_Options(Array.from({length:new Date(EndYear,EndMonth,0).getDate()},(_,day)=>day+1))
     },[EndMonth]);
-
+    
     return(
         <div className="Download_Dash">
             <div className="Download_Options">
@@ -44,7 +49,9 @@ function DownloadDash({state,dispatcher}){
                         onChange={
                             (event)=>{
                                 StateObject_Handler(
-                                    {key:"Temp_Ticker",target:event.target},
+                                    {
+                                        key:"Temp_Ticker",target:event.target
+                                    },
                                     dispatcher
                                 )}
                             }
@@ -66,6 +73,23 @@ function DownloadDash({state,dispatcher}){
                         }
                     }
                     >Add</button>
+                    <button
+                    className="RemoveTicker"
+                    onClick={
+                        ()=>{
+                            if (state.Temp_Ticker.length>=2){
+                                StateObject_Handler({
+                                    key:"Tickers",
+                                    target:[state.Tickers,state.Temp_Ticker]
+                                },dispatcher,"RemoveTickers");
+                                StateObject_Handler({
+                                    key:"Temp_Ticker",
+                                    target:""
+                                },dispatcher);
+                            }
+                        }
+                    }
+                    >Remove</button>
                     <textarea
                     className="CurrentTickers"
                     name="Tickers"
@@ -145,7 +169,40 @@ function DownloadDash({state,dispatcher}){
                 }}
                 >Render Chart Data</button>
                 <h3 className="Display_Label">{Selected_DataFile} Candlestick</h3>
-                <CandleStickChart data={state.Cached_JSON}/>
+                <input 
+                    className="LevelControl"
+                    type="range"
+                    min={0}
+                    max={8}
+                    step={.01}
+                    value={LevelController}
+                    onChange={(e)=>SetLevelController(parseFloat(e.target.value))}
+                ></input>
+                <h3 className="LevelControlLabel">
+                X Axis Level</h3>
+                <input 
+                    className="ZoomControl"
+                    type="range"
+                    min={.5}
+                    max={2.0}
+                    step={.01}
+                    value={ZoomController}
+                    onChange={(e)=>SetZoomController(parseFloat(e.target.value))}
+                ></input>
+                <h3 className="ZoomControlLabel">
+                Y Axis Zoom</h3>
+                <input 
+                    className="SensitivityControl"
+                    type="range"
+                    min={1.0}
+                    max={4.0}
+                    step={.01}
+                    value={ScrollSensitivityController}
+                    onChange={(e)=>SetScrollSensitivityController(parseFloat(e.target.value))}
+                ></input>
+                <h3 className="ScrollSensitivityLabel">
+                Scroll Sensitivity</h3>
+                <CandleStickChart data={state.Cached_JSON} XAxisSensitivity={ScrollSensitivityController} Leveling={LevelController} Zoom={ZoomController}/>
             </div>
         </div>
     )

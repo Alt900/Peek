@@ -40,7 +40,6 @@ pip3 install matplotlib==3.7.1
 pip3 install qiskit==0.45.0
 pip3 install qiskit_algorithms==0.3.0
 pip3 install qiskit_finance==0.4.1
-pip3 install alpaca==0.8.2
 pip3 install flask==3.0.3
 pip3 install flask_cors==4.0.1
 pip3 install qiskit_aer==0.12.0
@@ -57,15 +56,22 @@ If you are Windows there are two batch files called `StartAPI.bat` and `StartApp
 
 
 ## Using the download dashboard
-This dashboard is pretty straightforward and really only controls downloading data for each company's ticker given to the boxes on the right and within the date ranges selected left to the ticker input boxes. If there is data stored in the `MarketData` folder, when the program launches that data will be automatically loaded so there is no need to interact with this dashboard every time you want to perform some other operation like statistics or machine learning. The dashboard does also have a candlestick chart that will be generated when a ticker is selected from the dropdown in the middle of the top of the dashboard and the `render chart data` button is selected.
-![DownloadDash](ExampleImages/DownloadDash.png)
+This dashboard is pretty straightforward and really only controls downloading data for each company's ticker given to the boxes on the right and within the date ranges selected left to the ticker input boxes. If there is data stored in the `MarketData` folder, when the program launches that data will be automatically loaded so there is no need to interact with this dashboard every time you want to perform some other operation like statistics or machine learning. The dashboard does also have a candlestick chart that will be generated when a ticker is selected from the dropdown in the middle of the top of the dashboard and the `render chart data` button is selected. The graph generated can be dragged to move the X axis back and forth, X axis scroll sensitivity, Y axis zoom, and X axis leveling controlled through sliders on the top right of the graph.
+![DownloadDash](ExampleImages/Candlestick.png)
 
 
 ## Using the machine learning dashboard
-As explained previously, if there is data in the `MarketData` folder it will be automatically loaded, so there are no steps required before performing machine learning tasks, you can just load the application and start augmenting the hyperparameters listed off to the right and train the model when ready. As of now, like statistics, machine learning only has minimal functionality and currently only supports OHLC (candlestick) predictions with a multivariate LSTM. Just like the download dashboard the machine learning dash also has its own version of the candlestick chart where the normal candlestick data is loaded then when the model is done with its prediction, the prediction is attached to the end of the graph.
-![MLPred1](ExampleImages/MLPred1.png)
-And the prediction:
-![MLPred2](ExampleImages/MLPred2.png)
+As explained previously, if there is data in the `MarketData` folder it will be automatically loaded, so there are no steps required before performing machine learning tasks, you can just load the application and start augmenting the hyperparameters listed off to the right and train the model when ready. Aside from this there is also a custom machine learning constructor that allows for a user-defined sequential architecture with current support for LSTM (Unidirectional and Bidirectional) Dropout, and Dense layers with Tanh, ReLU, LeakyReLU, and Sigmoid activation functions alongside the added variables that you can mix and match at the top right and the hyperparameters from the pervious dash at the bottom right. While there is nearly unlimited free reign here there is only one consideration that should be made. Layers like LSTM and Dense operate a bit differently with one-to-one inputs, the outputs need to have some sort of nonlinearity introduced so NaN outputs are not produced causing PyTorch to crash. Standalone LSTM layers with proceeding layers are usually fine but if LSTM layers are stacked (LSTM->LSTM) there should be a activation function in-between to negate this issue (LSTM->ReLU->LSTM->...). Otherwise there is full range of customization.
+
+![CustomArch](ExampleImages/customarch.png)
+
+![GraphButtons](ExampleImages/graphbuttons.png)
+
+![AccuracyPlot](ExampleImages/fullscaleaccuracy.png)
+
+![Heatmap](ExampleImages/heatmap.png)
+
+![Prediction](ExampleImages/predictioncandle.png)
 
 
 ## Using the statistics dashboard
